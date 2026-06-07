@@ -8,6 +8,9 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard" },
+  { to: "/products", label: "Inventory" },
+  { to: "/sales", label: "Sales" },
+  { to: "/credits", label: "Credits" },
 ];
 
 export function AppShell() {
@@ -19,7 +22,9 @@ export function AppShell() {
     <div className="flex h-screen overflow-hidden">
       <aside className="flex w-60 shrink-0 flex-col justify-between bg-slate-900 text-slate-200">
         <div className="flex flex-col gap-6 px-4 py-6">
-          <div className="text-lg font-semibold tracking-tight text-white">App</div>
+          <div className="text-lg font-semibold tracking-tight text-white">
+            barangsecond
+          </div>
           <nav className="flex flex-col gap-1 text-sm">
             {NAV.map((item) => (
               <Link

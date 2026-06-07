@@ -7,8 +7,8 @@ import { ApiError } from "@/lib/api";
 import { me } from "@/features/auth/api";
 import { tokenAtom, userAtom } from "@/features/auth/state";
 
-const PUBLIC_PATHS = new Set(["/", "/login"]);
-const FULL_BLEED_PATHS = new Set([...PUBLIC_PATHS, "/onboarding"]);
+const UNAUTH_ALLOWED = new Set(["/login"]);
+const FULL_BLEED_PATHS = new Set(["/", "/login"]);
 
 export function AuthGate() {
   const [token, setToken] = useAtom(tokenAtom);
@@ -30,6 +30,10 @@ export function AuthGate() {
           setToken(null);
           setUser(null);
           sessionExpiredFiredRef.current = true;
+        } else {
+          // Non-401 failure (5xx, network): don't hang on splash — fall back to login.
+          setToken(null);
+          setUser(null);
         }
       });
     return () => {
@@ -39,15 +43,11 @@ export function AuthGate() {
 
   useEffect(() => {
     if (!token) {
-      if (!PUBLIC_PATHS.has(pathname)) navigate({ to: "/login" });
+      if (!UNAUTH_ALLOWED.has(pathname)) navigate({ to: "/login" });
       return;
     }
     if (!user) return;
-    if (!user.onboarded && pathname !== "/onboarding") {
-      navigate({ to: "/onboarding" });
-      return;
-    }
-    if (user.onboarded && (PUBLIC_PATHS.has(pathname) || pathname === "/onboarding")) {
+    if (FULL_BLEED_PATHS.has(pathname)) {
       navigate({ to: "/dashboard" });
     }
   }, [token, user, pathname, navigate]);
