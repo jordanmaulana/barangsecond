@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 export function SearchInput({
   value,
   onChange,
-  placeholder = "Search…",
+  placeholder = "Cari…",
   className,
 }: {
   value: string;

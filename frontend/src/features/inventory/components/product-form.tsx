@@ -58,7 +58,7 @@ export function ProductForm({ initial, submitting, onSubmit }: Props) {
     <Card className="max-w-2xl">
       <CardContent className="p-6">
         <form onSubmit={submit} className="space-y-5">
-          <Field label="Title" htmlFor="title" required>
+          <Field label="Judul" htmlFor="title" required>
             <Input
               id="title"
               value={title}
@@ -68,18 +68,18 @@ export function ProductForm({ initial, submitting, onSubmit }: Props) {
             />
           </Field>
 
-          <Field label="Description" htmlFor="desc">
+          <Field label="Deskripsi" htmlFor="desc">
             <Textarea
               id="desc"
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Condition, accessories, notes…"
+              placeholder="Kondisi, kelengkapan, catatan…"
             />
           </Field>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Buy price" htmlFor="buy" required>
+            <Field label="Harga beli" htmlFor="buy" required>
               <Input
                 id="buy"
                 type="number"
@@ -89,7 +89,7 @@ export function ProductForm({ initial, submitting, onSubmit }: Props) {
                 required
               />
             </Field>
-            <Field label="Sell price" htmlFor="sell" required>
+            <Field label="Harga jual" htmlFor="sell" required>
               <Input
                 id="sell"
                 type="number"
@@ -103,7 +103,7 @@ export function ProductForm({ initial, submitting, onSubmit }: Props) {
 
           {profitValid && (
             <div className="flex items-center justify-between rounded-[var(--radius-md)] bg-surface-muted px-4 py-3 text-sm">
-              <span className="text-muted-foreground">Projected profit</span>
+              <span className="text-muted-foreground">Perkiraan laba</span>
               <span
                 className={cn(
                   "tabular font-semibold",
@@ -115,7 +115,7 @@ export function ProductForm({ initial, submitting, onSubmit }: Props) {
             </div>
           )}
 
-          <Field label="Tags">
+          <Field label="Tag">
             <div className="flex flex-wrap gap-1.5">
               {tags?.map((t) => (
                 <button
@@ -132,13 +132,13 @@ export function ProductForm({ initial, submitting, onSubmit }: Props) {
                   {t.name}
                 </button>
               ))}
-              {!tags?.length && <span className="text-xs text-muted-foreground">No tags yet.</span>}
+              {!tags?.length && <span className="text-xs text-muted-foreground">Belum ada tag.</span>}
             </div>
           </Field>
 
           <div className="flex gap-2">
             <Input
-              placeholder="New tag…"
+              placeholder="Tag baru…"
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
               onKeyDown={(e) => {
@@ -155,13 +155,13 @@ export function ProductForm({ initial, submitting, onSubmit }: Props) {
               loading={createTag.isPending}
               className="shrink-0"
             >
-              <Plus className="h-4 w-4" /> Add
+              <Plus className="h-4 w-4" /> Tambah
             </Button>
           </div>
 
           <div className="flex justify-end border-t border-border pt-4">
             <Button type="submit" loading={submitting}>
-              Save product
+              Simpan produk
             </Button>
           </div>
         </form>

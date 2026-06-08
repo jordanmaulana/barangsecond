@@ -3,6 +3,7 @@ import { Check } from "lucide-react";
 import { toast } from "react-toastify";
 
 import type { Installment } from "@/features/credit/types";
+import { INSTALLMENT_STATUS_LABELS } from "@/features/credit/types";
 import { useMarkInstallmentPaid } from "@/features/credit/hooks";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ export function InstallmentTable({ installments }: { installments: Installment[]
   function confirmPay() {
     if (!target) return;
     pay.mutate(target.id, {
-      onSuccess: () => toast.success(`Installment #${target.sequence} marked paid`),
+      onSuccess: () => toast.success(`Cicilan #${target.sequence} ditandai lunas`),
       onError: (e) => toast.error(e.message),
     });
     setTarget(null);
@@ -30,11 +31,11 @@ export function InstallmentTable({ installments }: { installments: Installment[]
         <THead>
           <tr>
             <TH>#</TH>
-            <TH>Due date</TH>
-            <TH align="right">Amount</TH>
+            <TH>Jatuh tempo</TH>
+            <TH align="right">Jumlah</TH>
             <TH>Status</TH>
-            <TH>Paid on</TH>
-            <TH align="right">Action</TH>
+            <TH>Dibayar pada</TH>
+            <TH align="right">Aksi</TH>
           </tr>
         </THead>
         <TBody>
@@ -52,7 +53,7 @@ export function InstallmentTable({ installments }: { installments: Installment[]
               </TD>
               <NumCell>{formatIDR(i.amount)}</NumCell>
               <TD>
-                <Badge value={i.status} />
+                <Badge value={i.status} label={INSTALLMENT_STATUS_LABELS[i.status]} />
               </TD>
               <TD className="text-muted-foreground">{formatDate(i.paid_on)}</TD>
               <TD>
@@ -64,7 +65,7 @@ export function InstallmentTable({ installments }: { installments: Installment[]
                       onClick={() => setTarget(i)}
                       className="text-positive"
                     >
-                      <Check className="h-3.5 w-3.5" /> Mark paid
+                      <Check className="h-3.5 w-3.5" /> Tandai lunas
                     </Button>
                   )}
                 </div>
@@ -77,13 +78,13 @@ export function InstallmentTable({ installments }: { installments: Installment[]
       <ConfirmDialog
         open={!!target}
         onOpenChange={(o) => !o && setTarget(null)}
-        title="Mark installment paid?"
+        title="Tandai cicilan lunas?"
         description={
           target
-            ? `Installment #${target.sequence} · ${formatIDR(target.amount)} due ${formatDate(target.due_date)}.`
+            ? `Cicilan #${target.sequence} · ${formatIDR(target.amount)} jatuh tempo ${formatDate(target.due_date)}.`
             : ""
         }
-        confirmLabel="Mark paid"
+        confirmLabel="Tandai lunas"
         loading={pay.isPending}
         onConfirm={confirmPay}
       />

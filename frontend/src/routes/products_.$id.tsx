@@ -19,8 +19,8 @@ function EditProductPage() {
 
   return (
     <div className="space-y-5">
-      <BackLink to="/products" label="Inventory" />
-      <PageHeader title="Edit product" subtitle={product?.title} />
+      <BackLink to="/products" label="Inventaris" />
+      <PageHeader title="Ubah produk" subtitle={product?.title} />
       {isLoading || !product ? (
         <Skeleton className="h-96 max-w-2xl" />
       ) : (
@@ -30,7 +30,7 @@ function EditProductPage() {
           onSubmit={(data) =>
             update.mutate(data, {
               onSuccess: () => {
-                toast.success("Product updated");
+                toast.success("Produk diperbarui");
                 navigate({ to: "/products" });
               },
               onError: (e) => toast.error(e.message),

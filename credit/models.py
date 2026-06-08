@@ -17,17 +17,23 @@ class Credit(BaseModel):
 
     @property
     def paid_amount(self):
-        paid = self.installments.filter(status=Installment.Status.PAID)
-        return sum((i.amount for i in paid), Decimal("0"))
+        # Iterate the (prefetched) related set so prefetch_related("installments")
+        # is reused; .filter() would spawn a fresh query and bypass the cache.
+        return sum(
+            (i.amount for i in self.installments.all() if i.status == Installment.Status.PAID),
+            Decimal("0"),
+        )
 
     @property
     def outstanding(self):
-        unpaid = self.installments.exclude(status=Installment.Status.PAID)
-        return sum((i.amount for i in unpaid), Decimal("0"))
+        return sum(
+            (i.amount for i in self.installments.all() if i.status != Installment.Status.PAID),
+            Decimal("0"),
+        )
 
     @property
     def is_settled(self):
-        return not self.installments.exclude(status=Installment.Status.PAID).exists()
+        return all(i.status == Installment.Status.PAID for i in self.installments.all())
 
 
 class Installment(BaseModel):

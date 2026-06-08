@@ -9,6 +9,10 @@ export function formatIDR(value: string | number): string {
   return Number.isFinite(n) ? IDR.format(n) : "—";
 }
 
+export function formatPercent(value: number): string {
+  return Number.isFinite(value) ? `${Math.round(value * 100)}%` : "—";
+}
+
 export function formatDate(value: string | null): string {
   if (!value) return "—";
   return new Date(value).toLocaleDateString("id-ID", {

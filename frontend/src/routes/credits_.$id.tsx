@@ -21,7 +21,7 @@ function CreditDetailPage() {
   if (isLoading || !credit) {
     return (
       <div className="space-y-5">
-        <BackLink to="/credits" label="Credits" />
+        <BackLink to="/credits" label="Kredit" />
         <Skeleton className="h-10 w-64" />
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -35,24 +35,24 @@ function CreditDetailPage() {
 
   return (
     <div className="space-y-6">
-      <BackLink to="/credits" label="Credits" />
+      <BackLink to="/credits" label="Kredit" />
       <PageHeader
         title={credit.product_title}
-        subtitle={`${credit.buyer_name || "—"} · sold ${formatDate(credit.sold_on)} · ${credit.tenor_months} months`}
+        subtitle={`${credit.buyer_name || "—"} · terjual ${formatDate(credit.sold_on)} · ${credit.tenor_months} bulan`}
         actions={
           <Badge
             value={credit.is_settled ? "settled" : "active"}
-            label={credit.is_settled ? "Settled" : "Active"}
+            label={credit.is_settled ? "Lunas" : "Aktif"}
           />
         }
       />
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <StatCard label="Total" value={formatIDR(credit.total_price)} icon={Receipt} />
-        <StatCard label="Down payment" value={formatIDR(credit.down_payment)} icon={Coins} />
-        <StatCard label="Paid" value={formatIDR(credit.paid_amount)} icon={Wallet} tone="positive" />
+        <StatCard label="Uang muka" value={formatIDR(credit.down_payment)} icon={Coins} />
+        <StatCard label="Terbayar" value={formatIDR(credit.paid_amount)} icon={Wallet} tone="positive" />
         <StatCard
-          label="Outstanding"
+          label="Sisa tagihan"
           value={formatIDR(credit.outstanding)}
           icon={CalendarClock}
           tone={credit.is_settled ? "positive" : "warning"}
@@ -61,7 +61,7 @@ function CreditDetailPage() {
 
       <div className="space-y-3">
         <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Installment schedule
+          Jadwal cicilan
         </h2>
         <InstallmentTable installments={credit.installments} />
       </div>

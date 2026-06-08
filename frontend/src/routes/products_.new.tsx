@@ -16,14 +16,14 @@ function NewProductPage() {
 
   return (
     <div className="space-y-5">
-      <BackLink to="/products" label="Inventory" />
-      <PageHeader title="New product" subtitle="Add an item to your inventory." />
+      <BackLink to="/products" label="Inventaris" />
+      <PageHeader title="Produk baru" subtitle="Tambah barang ke inventaris Anda." />
       <ProductForm
         submitting={create.isPending}
         onSubmit={(data) =>
           create.mutate(data, {
             onSuccess: () => {
-              toast.success("Product created");
+              toast.success("Produk dibuat");
               navigate({ to: "/products" });
             },
             onError: (e) => toast.error(e.message),

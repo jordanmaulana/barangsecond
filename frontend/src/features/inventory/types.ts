@@ -5,10 +5,10 @@ export type ProductStatus =
   | "installment_paid";
 
 export const PRODUCT_STATUS_LABELS: Record<ProductStatus, string> = {
-  available: "Available",
-  sold_cash: "Sold (cash)",
-  ongoing_installment: "Installment",
-  installment_paid: "Paid off",
+  available: "Tersedia",
+  sold_cash: "Terjual (tunai)",
+  ongoing_installment: "Cicilan",
+  installment_paid: "Lunas",
 };
 
 export interface Tag {

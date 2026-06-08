@@ -20,15 +20,15 @@ function NewSalePage() {
 
   return (
     <div className="space-y-5">
-      <BackLink to="/sales" label="Sales" />
-      <PageHeader title="New sale" subtitle="Record a cash or sharia-credit sale." />
+      <BackLink to="/sales" label="Penjualan" />
+      <PageHeader title="Penjualan baru" subtitle="Catat penjualan tunai atau kredit syariah." />
       <SaleForm
         preselected={preselected}
         submitting={create.isPending}
         onSubmit={(data) =>
           create.mutate(data, {
             onSuccess: () => {
-              toast.success("Sale recorded");
+              toast.success("Penjualan dicatat");
               navigate({ to: "/sales" });
             },
             onError: (err) => toast.error(err.message),

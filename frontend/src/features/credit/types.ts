@@ -1,5 +1,11 @@
 export type InstallmentStatus = "due" | "paid" | "overdue";
 
+export const INSTALLMENT_STATUS_LABELS: Record<InstallmentStatus, string> = {
+  due: "Jatuh tempo",
+  paid: "Lunas",
+  overdue: "Terlambat",
+};
+
 export interface Installment {
   id: string;
   sequence: number;

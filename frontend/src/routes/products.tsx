@@ -60,8 +60,8 @@ function ProductsPage() {
     if (!toDelete) return;
     const name = toDelete.title;
     del.mutate(toDelete.id, {
-      onSuccess: () => toast.success(`Deleted "${name}"`),
-      onError: () => toast.error("Failed to delete"),
+      onSuccess: () => toast.success(`"${name}" dihapus`),
+      onError: () => toast.error("Gagal menghapus"),
     });
     setToDelete(null);
   }
@@ -69,12 +69,12 @@ function ProductsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Inventory"
-        subtitle="Everything you've bought to resell."
+        title="Inventaris"
+        subtitle="Semua barang yang Anda beli untuk dijual lagi."
         actions={
           <Button asChild>
             <Link to="/products/new">
-              <Plus className="h-4 w-4" /> New product
+              <Plus className="h-4 w-4" /> Produk baru
             </Link>
           </Button>
         }
@@ -83,11 +83,11 @@ function ProductsPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Segmented
           options={[
-            { value: "", label: "All" },
-            { value: "available", label: "Available" },
-            { value: "sold_cash", label: "Sold (cash)" },
-            { value: "ongoing_installment", label: "Installment" },
-            { value: "installment_paid", label: "Paid off" },
+            { value: "", label: "Semua" },
+            { value: "available", label: "Tersedia" },
+            { value: "sold_cash", label: "Terjual (tunai)" },
+            { value: "ongoing_installment", label: "Cicilan" },
+            { value: "installment_paid", label: "Lunas" },
           ]}
           value={status}
           onChange={(v) => setStatus(v as ProductStatus | "")}
@@ -95,7 +95,7 @@ function ProductsPage() {
         <SearchInput
           value={query}
           onChange={setQuery}
-          placeholder="Search title or tag…"
+          placeholder="Cari judul atau tag…"
           className="sm:w-72"
         />
       </div>
@@ -103,13 +103,13 @@ function ProductsPage() {
       <Table>
         <THead>
           <tr>
-            <SortHeader label="Product" active={sort.key === "title"} dir={sort.dir} onClick={() => toggleSort("title")} />
-            <TH>Tags</TH>
-            <SortHeader label="Buy" align="right" active={sort.key === "buy_price"} dir={sort.dir} onClick={() => toggleSort("buy_price")} />
-            <SortHeader label="Sell" align="right" active={sort.key === "sell_price"} dir={sort.dir} onClick={() => toggleSort("sell_price")} />
-            <SortHeader label="Profit" align="right" active={sort.key === "profit"} dir={sort.dir} onClick={() => toggleSort("profit")} />
+            <SortHeader label="Produk" active={sort.key === "title"} dir={sort.dir} onClick={() => toggleSort("title")} />
+            <TH>Tag</TH>
+            <SortHeader label="Beli" align="right" active={sort.key === "buy_price"} dir={sort.dir} onClick={() => toggleSort("buy_price")} />
+            <SortHeader label="Jual" align="right" active={sort.key === "sell_price"} dir={sort.dir} onClick={() => toggleSort("sell_price")} />
+            <SortHeader label="Laba" align="right" active={sort.key === "profit"} dir={sort.dir} onClick={() => toggleSort("profit")} />
             <TH>Status</TH>
-            <TH align="right">Actions</TH>
+            <TH align="right">Aksi</TH>
           </tr>
         </THead>
         <TBody>
@@ -120,13 +120,13 @@ function ProductsPage() {
               <td colSpan={7}>
                 <EmptyState
                   icon={Package}
-                  title={query || status ? "No matching products" : "No products yet"}
-                  hint={query || status ? "Try a different filter or search." : "Add your first item to start tracking."}
+                  title={query || status ? "Tidak ada produk cocok" : "Belum ada produk"}
+                  hint={query || status ? "Coba filter atau pencarian lain." : "Tambah barang pertama untuk mulai melacak."}
                   action={
                     !query && !status ? (
                       <Button asChild size="sm">
                         <Link to="/products/new">
-                          <Plus className="h-4 w-4" /> New product
+                          <Plus className="h-4 w-4" /> Produk baru
                         </Link>
                       </Button>
                     ) : undefined
@@ -159,13 +159,13 @@ function ProductsPage() {
                 <TD>
                   <div className="flex items-center justify-end gap-1">
                     {!p.is_sold && (
-                      <Button asChild variant="ghost" size="icon" title="Sell">
+                      <Button asChild variant="ghost" size="icon" title="Jual">
                         <Link to="/sales/new" search={{ product: p.id }}>
                           <ShoppingCart className="h-4 w-4" />
                         </Link>
                       </Button>
                     )}
-                    <Button asChild variant="ghost" size="icon" title="Edit">
+                    <Button asChild variant="ghost" size="icon" title="Ubah">
                       <Link to="/products/$id" params={{ id: p.id }}>
                         <Pencil className="h-4 w-4" />
                       </Link>
@@ -173,7 +173,7 @@ function ProductsPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      title="Delete"
+                      title="Hapus"
                       disabled={p.is_sold}
                       onClick={() => setToDelete(p)}
                       className="text-muted-foreground hover:text-negative"
@@ -191,9 +191,9 @@ function ProductsPage() {
       <ConfirmDialog
         open={!!toDelete}
         onOpenChange={(o) => !o && setToDelete(null)}
-        title="Delete product?"
-        description={toDelete ? `"${toDelete.title}" will be permanently removed.` : ""}
-        confirmLabel="Delete"
+        title="Hapus produk?"
+        description={toDelete ? `"${toDelete.title}" akan dihapus permanen.` : ""}
+        confirmLabel="Hapus"
         destructive
         onConfirm={confirmDelete}
       />

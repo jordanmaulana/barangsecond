@@ -37,7 +37,9 @@ def credit_detail(request, credit_id):
 @permission_classes([IsAuthenticated])
 def pay_installment(request, installment_id):
     try:
-        installment = Installment.objects.get(id=installment_id)
+        installment = Installment.objects.select_related("credit__sale__product").get(
+            id=installment_id
+        )
     except Installment.DoesNotExist:
         return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
     if installment.status == Installment.Status.PAID:

@@ -15,10 +15,10 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { cn } from "@/lib/utils";
 
 const NAV: { to: string; label: string; icon: LucideIcon }[] = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/products", label: "Inventory", icon: Package },
-  { to: "/sales", label: "Sales", icon: ShoppingCart },
-  { to: "/credits", label: "Credits", icon: CreditCard },
+  { to: "/dashboard", label: "Dasbor", icon: LayoutDashboard },
+  { to: "/products", label: "Inventaris", icon: Package },
+  { to: "/sales", label: "Penjualan", icon: ShoppingCart },
+  { to: "/credits", label: "Kredit", icon: CreditCard },
 ];
 
 function isActive(pathname: string, to: string) {
@@ -69,7 +69,7 @@ export function AppShell() {
             {user && (
               <div className="min-w-0">
                 <div className="truncate text-sm font-medium text-foreground">{user.email}</div>
-                <div className="text-xs text-muted-foreground">Signed in</div>
+                <div className="text-xs text-muted-foreground">Masuk sebagai</div>
               </div>
             )}
             <ThemeToggle />
@@ -80,7 +80,7 @@ export function AppShell() {
             className="flex items-center gap-2 rounded-[var(--radius-md)] border border-border px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground"
           >
             <LogOut className="h-4 w-4" />
-            Log out
+            Keluar
           </button>
         </div>
       </aside>

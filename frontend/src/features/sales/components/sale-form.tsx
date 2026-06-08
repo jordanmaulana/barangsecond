@@ -45,15 +45,15 @@ export function SaleForm({ preselected, submitting, onSubmit }: Props) {
 
   function validate(): Errors {
     const e: Errors = {};
-    if (!productId) e.product = "Select a product.";
-    if (!salePrice) e.salePrice = "Required.";
+    if (!productId) e.product = "Pilih produk.";
+    if (!salePrice) e.salePrice = "Wajib diisi.";
     if (saleType === "credit") {
       const total = Number(totalPrice);
       const down = Number(downPayment) || 0;
-      if (!totalPrice) e.total = "Required.";
-      else if (total < Number(salePrice)) e.total = "Must be ≥ sale price.";
-      if (down >= total && total > 0) e.down = "Must be less than total.";
-      if (tenorN < 1 || tenorN > 60) e.tenor = "Between 1 and 60 months.";
+      if (!totalPrice) e.total = "Wajib diisi.";
+      else if (total < Number(salePrice)) e.total = "Harus ≥ harga jual.";
+      if (down >= total && total > 0) e.down = "Harus lebih kecil dari total.";
+      if (tenorN < 1 || tenorN > 60) e.tenor = "Antara 1 dan 60 bulan.";
     }
     return e;
   }
@@ -86,10 +86,10 @@ export function SaleForm({ preselected, submitting, onSubmit }: Props) {
     <Card className="max-w-2xl">
       <CardContent className="p-6">
         <form onSubmit={submit} className="space-y-5">
-          <Field label="Product" error={errors.product} required>
+          <Field label="Produk" error={errors.product} required>
             <Select value={productId} onValueChange={setProductId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select available product…" />
+                <SelectValue placeholder="Pilih produk tersedia…" />
               </SelectTrigger>
               <SelectContent>
                 {products?.length ? (
@@ -100,19 +100,19 @@ export function SaleForm({ preselected, submitting, onSubmit }: Props) {
                   ))
                 ) : (
                   <div className="px-3 py-2 text-sm text-muted-foreground">
-                    No available products.
+                    Tidak ada produk tersedia.
                   </div>
                 )}
               </SelectContent>
             </Select>
           </Field>
 
-          <Field label="Payment method">
+          <Field label="Metode pembayaran">
             <Segmented
               className="w-full"
               options={[
-                { value: "cash", label: "Cash" },
-                { value: "credit", label: "Sharia credit" },
+                { value: "cash", label: "Tunai" },
+                { value: "credit", label: "Kredit syariah" },
               ]}
               value={saleType}
               onChange={(v) => setSaleType(v as SaleType)}
@@ -120,7 +120,7 @@ export function SaleForm({ preselected, submitting, onSubmit }: Props) {
           </Field>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Sale price" htmlFor="salePrice" error={errors.salePrice} required>
+            <Field label="Harga jual" htmlFor="salePrice" error={errors.salePrice} required>
               <Input
                 id="salePrice"
                 type="number"
@@ -130,7 +130,7 @@ export function SaleForm({ preselected, submitting, onSubmit }: Props) {
                 onChange={(e) => setSalePrice(e.target.value)}
               />
             </Field>
-            <Field label="Date" htmlFor="soldOn" required>
+            <Field label="Tanggal" htmlFor="soldOn" required>
               <Input
                 id="soldOn"
                 type="date"
@@ -141,10 +141,10 @@ export function SaleForm({ preselected, submitting, onSubmit }: Props) {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Buyer name" htmlFor="buyerName">
+            <Field label="Nama pembeli" htmlFor="buyerName">
               <Input id="buyerName" value={buyerName} onChange={(e) => setBuyerName(e.target.value)} />
             </Field>
-            <Field label="Buyer phone" htmlFor="buyerPhone">
+            <Field label="Telepon pembeli" htmlFor="buyerPhone">
               <Input id="buyerPhone" value={buyerPhone} onChange={(e) => setBuyerPhone(e.target.value)} />
             </Field>
           </div>
@@ -152,7 +152,7 @@ export function SaleForm({ preselected, submitting, onSubmit }: Props) {
           {saleType === "credit" && (
             <div className="space-y-4 rounded-[var(--radius-lg)] border border-accent/20 bg-accent-soft/40 p-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <Field label="Total price" htmlFor="total" error={errors.total} required>
+                <Field label="Harga total" htmlFor="total" error={errors.total} required>
                   <Input
                     id="total"
                     type="number"
@@ -162,7 +162,7 @@ export function SaleForm({ preselected, submitting, onSubmit }: Props) {
                     onChange={(e) => setTotalPrice(e.target.value)}
                   />
                 </Field>
-                <Field label="Down payment" htmlFor="down" error={errors.down}>
+                <Field label="Uang muka" htmlFor="down" error={errors.down}>
                   <Input
                     id="down"
                     type="number"
@@ -172,7 +172,7 @@ export function SaleForm({ preselected, submitting, onSubmit }: Props) {
                     onChange={(e) => setDownPayment(e.target.value)}
                   />
                 </Field>
-                <Field label="Tenor (months)" htmlFor="tenor" error={errors.tenor} required>
+                <Field label="Tenor (bulan)" htmlFor="tenor" error={errors.tenor} required>
                   <Input
                     id="tenor"
                     type="number"
@@ -185,10 +185,10 @@ export function SaleForm({ preselected, submitting, onSubmit }: Props) {
                 </Field>
               </div>
               <div className="flex items-center justify-between rounded-[var(--radius-md)] bg-surface px-4 py-3 text-sm shadow-card">
-                <span className="text-muted-foreground">Suggested monthly</span>
+                <span className="text-muted-foreground">Saran cicilan bulanan</span>
                 <span className="tabular font-semibold text-foreground">
                   {formatIDR(suggestedMonthly)}
-                  <span className="ml-1 font-normal text-muted-foreground">× {tenorN || 0} mo</span>
+                  <span className="ml-1 font-normal text-muted-foreground">× {tenorN || 0} bln</span>
                 </span>
               </div>
             </div>
@@ -196,7 +196,7 @@ export function SaleForm({ preselected, submitting, onSubmit }: Props) {
 
           <div className={cn("flex justify-end border-t border-border pt-4")}>
             <Button type="submit" loading={submitting}>
-              Record sale
+              Catat penjualan
             </Button>
           </div>
         </form>

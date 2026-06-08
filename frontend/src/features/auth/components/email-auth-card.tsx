@@ -29,7 +29,7 @@ function parseError(err: unknown): { fields: FieldErrors; message: string } {
       pick("non_field_errors") ?? pick("detail") ?? fields.email ?? fields.password ?? err.message;
     return { fields, message: general };
   }
-  return { fields: {}, message: err instanceof Error ? err.message : "Something went wrong" };
+  return { fields: {}, message: err instanceof Error ? err.message : "Terjadi kesalahan" };
 }
 
 export function EmailAuthCard() {
@@ -64,8 +64,8 @@ export function EmailAuthCard() {
         <Segmented
           className="w-full"
           options={[
-            { value: "login", label: "Sign in" },
-            { value: "register", label: "Register" },
+            { value: "login", label: "Masuk" },
+            { value: "register", label: "Daftar" },
           ]}
           value={mode}
           onChange={(m) => {
@@ -87,10 +87,10 @@ export function EmailAuthCard() {
             />
           </Field>
           <Field
-            label="Password"
+            label="Kata sandi"
             htmlFor="password"
             error={errors.password}
-            hint={mode === "register" ? "At least 8 characters." : undefined}
+            hint={mode === "register" ? "Minimal 8 karakter." : undefined}
           >
             <Input
               id="password"
@@ -105,7 +105,7 @@ export function EmailAuthCard() {
             />
           </Field>
           <Button type="submit" className="w-full" loading={mutation.isPending}>
-            {mode === "login" ? "Sign in" : "Create account"}
+            {mode === "login" ? "Masuk" : "Buat akun"}
           </Button>
         </form>
       </CardContent>

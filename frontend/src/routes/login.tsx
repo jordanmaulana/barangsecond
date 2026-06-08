@@ -5,9 +5,9 @@ import { EmailAuthCard } from "@/features/auth/components/email-auth-card";
 import { GoogleSignInCard } from "@/features/auth/components/google-sign-in-card";
 
 const HIGHLIGHTS = [
-  { icon: Package, text: "Track every item — phones, cars, anything." },
-  { icon: CreditCard, text: "Cash or sharia credit with auto installment schedules." },
-  { icon: LineChart, text: "Live insights on revenue, profit & outstanding credit." },
+  { icon: Package, text: "Lacak setiap barang — HP, mobil, apa saja." },
+  { icon: CreditCard, text: "Tunai atau kredit syariah dengan jadwal cicilan otomatis." },
+  { icon: LineChart, text: "Wawasan langsung pendapatan, laba & sisa kredit." },
 ];
 
 export const Route = createFileRoute("/login")({
@@ -34,11 +34,11 @@ function LoginPage() {
         </div>
         <div className="relative space-y-8">
           <h1 className="font-display text-4xl font-semibold leading-tight tracking-tight">
-            Secondhand stock,
+            Stok bekas,
             <br />
-            sales & credit —
+            penjualan & kredit —
             <br />
-            in one ledger.
+            dalam satu buku besar.
           </h1>
           <ul className="space-y-4">
             {HIGHLIGHTS.map((h) => (
@@ -61,12 +61,12 @@ function LoginPage() {
             <span className="font-display text-2xl font-semibold tracking-tight text-foreground">
               barangsecond
             </span>
-            <p className="text-sm text-muted-foreground">Inventory, sales & credit tracker.</p>
+            <p className="text-sm text-muted-foreground">Pelacak inventaris, penjualan & kredit.</p>
           </div>
           <EmailAuthCard />
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span className="h-px flex-1 bg-border" />
-            OR
+            ATAU
             <span className="h-px flex-1 bg-border" />
           </div>
           <GoogleSignInCard />

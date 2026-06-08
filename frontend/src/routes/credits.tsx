@@ -32,13 +32,13 @@ function CreditsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Credits" subtitle="Sharia-credit sales & their schedules." />
+      <PageHeader title="Kredit" subtitle="Penjualan kredit syariah & jadwalnya." />
 
       <div className="flex justify-end">
         <SearchInput
           value={query}
           onChange={setQuery}
-          placeholder="Search product or buyer…"
+          placeholder="Cari produk atau pembeli…"
           className="sm:w-72"
         />
       </div>
@@ -46,13 +46,13 @@ function CreditsPage() {
       <Table>
         <THead>
           <tr>
-            <TH>Product</TH>
-            <TH>Buyer</TH>
+            <TH>Produk</TH>
+            <TH>Pembeli</TH>
             <TH align="right">Total</TH>
-            <TH align="right">Outstanding</TH>
+            <TH align="right">Sisa tagihan</TH>
             <TH align="center">Tenor</TH>
             <TH>Status</TH>
-            <TH align="right">Actions</TH>
+            <TH align="right">Aksi</TH>
           </tr>
         </THead>
         <TBody>
@@ -63,8 +63,8 @@ function CreditsPage() {
               <td colSpan={7}>
                 <EmptyState
                   icon={CreditCard}
-                  title={query ? "No matching credits" : "No credit sales yet"}
-                  hint={query ? "Try a different search." : "Credit sales appear here automatically."}
+                  title={query ? "Tidak ada kredit cocok" : "Belum ada penjualan kredit"}
+                  hint={query ? "Coba pencarian lain." : "Penjualan kredit muncul di sini otomatis."}
                 />
               </td>
             </tr>
@@ -75,18 +75,18 @@ function CreditsPage() {
                 <TD className="text-muted-foreground">{c.buyer_name || "—"}</TD>
                 <NumCell className="text-muted-foreground">{formatIDR(c.total_price)}</NumCell>
                 <NumCell className="font-medium">{formatIDR(c.outstanding)}</NumCell>
-                <TD className="text-center text-muted-foreground">{c.tenor_months} mo</TD>
+                <TD className="text-center text-muted-foreground">{c.tenor_months} bln</TD>
                 <TD>
                   <Badge
                     value={c.is_settled ? "settled" : "active"}
-                    label={c.is_settled ? "Settled" : "Active"}
+                    label={c.is_settled ? "Lunas" : "Aktif"}
                   />
                 </TD>
                 <TD>
                   <div className="flex justify-end">
                     <Button asChild variant="ghost" size="sm">
                       <Link to="/credits/$id" params={{ id: c.id }}>
-                        Schedule <ExternalLink className="h-3.5 w-3.5" />
+                        Jadwal <ExternalLink className="h-3.5 w-3.5" />
                       </Link>
                     </Button>
                   </div>

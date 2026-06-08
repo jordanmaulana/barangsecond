@@ -35,7 +35,7 @@ export function GoogleSignInCard() {
       callback: ({ credential }) =>
         signIn.mutate(credential, {
           onSuccess: () => navigate({ to: "/dashboard" }),
-          onError: (err) => toast.error(err instanceof Error ? err.message : "Sign-in failed"),
+          onError: (err) => toast.error(err instanceof Error ? err.message : "Gagal masuk"),
         }),
     });
     ref.current.innerHTML = "";
