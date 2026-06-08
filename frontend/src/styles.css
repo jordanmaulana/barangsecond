@@ -1,14 +1,95 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+@import "@fontsource-variable/bricolage-grotesque";
 
 @custom-variant dark (&:is(.dark *));
 
+/* ---------------------------------------------------------------------------
+   Refined Fintech design tokens — deep indigo accent, cool neutrals,
+   semantic money colors. Light + dark via .dark on <html>.
+--------------------------------------------------------------------------- */
+:root {
+  --background: hsl(240 24% 99%);
+  --surface: hsl(0 0% 100%);
+  --surface-muted: hsl(240 20% 96.5%);
+  --border: hsl(240 16% 90%);
+  --border-strong: hsl(240 14% 83%);
+  --foreground: hsl(240 26% 12%);
+  --muted-foreground: hsl(240 8% 45%);
+
+  --accent: hsl(243 72% 58%);
+  --accent-foreground: hsl(0 0% 100%);
+  --accent-soft: hsl(243 72% 58% / 0.1);
+
+  --positive: hsl(160 72% 36%);
+  --warning: hsl(34 92% 46%);
+  --negative: hsl(351 78% 53%);
+  --info: hsl(217 80% 54%);
+
+  --ring: hsl(243 72% 58% / 0.45);
+
+  --radius: 0.75rem;
+
+  --shadow-sm: 0 1px 2px 0 hsl(240 30% 20% / 0.06), 0 1px 3px 0 hsl(240 30% 20% / 0.05);
+  --shadow-md: 0 4px 12px -2px hsl(240 30% 20% / 0.08), 0 2px 6px -2px hsl(240 30% 20% / 0.06);
+  --shadow-lg: 0 16px 40px -8px hsl(240 35% 18% / 0.18), 0 6px 16px -6px hsl(240 35% 18% / 0.12);
+}
+
+.dark {
+  --background: hsl(240 16% 8%);
+  --surface: hsl(240 14% 11%);
+  --surface-muted: hsl(240 12% 15%);
+  --border: hsl(240 11% 20%);
+  --border-strong: hsl(240 10% 27%);
+  --foreground: hsl(240 22% 96%);
+  --muted-foreground: hsl(240 9% 62%);
+
+  --accent: hsl(246 90% 72%);
+  --accent-foreground: hsl(243 60% 12%);
+  --accent-soft: hsl(246 90% 72% / 0.14);
+
+  --positive: hsl(158 62% 50%);
+  --warning: hsl(40 94% 56%);
+  --negative: hsl(351 88% 68%);
+  --info: hsl(214 88% 66%);
+
+  --ring: hsl(246 90% 72% / 0.5);
+
+  --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.3);
+  --shadow-md: 0 4px 14px -2px hsl(0 0% 0% / 0.45);
+  --shadow-lg: 0 18px 44px -8px hsl(0 0% 0% / 0.6);
+}
+
 @theme inline {
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
-  --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(0 0% 9%);
-  --radius: 0.625rem;
+  --font-display: "Bricolage Grotesque Variable", "Geist Variable", ui-sans-serif, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-positive: var(--positive);
+  --color-warning: var(--warning);
+  --color-negative: var(--negative);
+  --color-info: var(--info);
+  --color-ring: var(--ring);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 0.25rem);
+  --radius-sm: calc(var(--radius) - 0.4rem);
+
+  --shadow-card: var(--shadow-sm);
+  --shadow-pop: var(--shadow-md);
+  --shadow-float: var(--shadow-lg);
 }
 
 html, body, #root {
@@ -19,4 +100,43 @@ body {
   font-family: var(--font-sans);
   background: var(--color-background);
   color: var(--color-foreground);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* Tabular figures for all monetary / numeric display */
+.tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* ---- Staggered page-load reveal ---------------------------------------- */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.reveal {
+  animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.reveal-1 { animation-delay: 0.04s; }
+.reveal-2 { animation-delay: 0.10s; }
+.reveal-3 { animation-delay: 0.16s; }
+.reveal-4 { animation-delay: 0.22s; }
+.reveal-5 { animation-delay: 0.28s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { animation: none; }
+}
+
+/* Subtle custom scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
 }

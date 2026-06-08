@@ -4,37 +4,39 @@ import { toast } from "react-toastify";
 
 import { useEmailLogin, useEmailRegister } from "@/features/auth/hooks";
 import { ApiError } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Field } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Segmented } from "@/components/ui/segmented";
 
 type Mode = "login" | "register";
 
-function errorMessage(err: unknown): string {
-  if (err instanceof ApiError) {
-    const data = err.data;
-    if (data && typeof data === "object") {
-      for (const value of Object.values(data as Record<string, unknown>)) {
-        if (typeof value === "string") return value;
-        if (Array.isArray(value) && typeof value[0] === "string") return value[0];
-      }
-    }
-    return err.message;
+type FieldErrors = { email?: string; password?: string };
+
+/** Split a DRF error into per-field messages + a fallback toast message. */
+function parseError(err: unknown): { fields: FieldErrors; message: string } {
+  if (err instanceof ApiError && err.data && typeof err.data === "object") {
+    const data = err.data as Record<string, unknown>;
+    const pick = (k: string) => {
+      const v = data[k];
+      if (typeof v === "string") return v;
+      if (Array.isArray(v) && typeof v[0] === "string") return v[0];
+      return undefined;
+    };
+    const fields: FieldErrors = { email: pick("email"), password: pick("password") };
+    const general =
+      pick("non_field_errors") ?? pick("detail") ?? fields.email ?? fields.password ?? err.message;
+    return { fields, message: general };
   }
-  return err instanceof Error ? err.message : "Something went wrong";
+  return { fields: {}, message: err instanceof Error ? err.message : "Something went wrong" };
 }
-
-const tabClass = (active: boolean) =>
-  `flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition ${
-    active ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"
-  }`;
-
-const inputClass =
-  "mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none";
-
-const labelClass = "text-sm font-medium text-slate-700";
 
 export function EmailAuthCard() {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<FieldErrors>({});
   const navigate = useNavigate();
   const login = useEmailLogin();
   const register = useEmailRegister();
@@ -42,77 +44,71 @@ export function EmailAuthCard() {
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setErrors({});
     mutation.mutate(
       { email, password },
       {
         onSuccess: () => navigate({ to: "/dashboard" }),
-        onError: (err) => toast.error(errorMessage(err)),
+        onError: (err) => {
+          const { fields, message } = parseError(err);
+          setErrors(fields);
+          toast.error(message);
+        },
       },
     );
   }
 
   return (
-    <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="mb-5 flex gap-1 rounded-lg bg-slate-50 p-1">
-        <button type="button" className={tabClass(mode === "login")} onClick={() => setMode("login")}>
-          Login
-        </button>
-        <button
-          type="button"
-          className={tabClass(mode === "register")}
-          onClick={() => setMode("register")}
-        >
-          Register
-        </button>
-      </div>
-
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className={labelClass}>
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            required
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label htmlFor="password" className={labelClass}>
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            required
-            minLength={mode === "register" ? 8 : undefined}
-            autoComplete={mode === "register" ? "new-password" : "current-password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={inputClass}
-          />
-          {mode === "register" && (
-            <p className="mt-1 text-xs text-slate-500">At least 8 characters.</p>
-          )}
-        </div>
-        <button
-          type="submit"
-          disabled={mutation.isPending}
-          className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
-        >
-          {mutation.isPending
-            ? mode === "login"
-              ? "Signing in…"
-              : "Creating account…"
-            : mode === "login"
-              ? "Sign in"
-              : "Create account"}
-        </button>
-      </form>
-    </div>
+    <Card>
+      <CardContent className="space-y-5 p-6">
+        <Segmented
+          className="w-full"
+          options={[
+            { value: "login", label: "Sign in" },
+            { value: "register", label: "Register" },
+          ]}
+          value={mode}
+          onChange={(m) => {
+            setMode(m);
+            setErrors({});
+          }}
+        />
+        <form onSubmit={onSubmit} className="space-y-4">
+          <Field label="Email" htmlFor="email" error={errors.email}>
+            <Input
+              id="email"
+              type="email"
+              required
+              autoComplete="email"
+              aria-invalid={!!errors.email}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+            />
+          </Field>
+          <Field
+            label="Password"
+            htmlFor="password"
+            error={errors.password}
+            hint={mode === "register" ? "At least 8 characters." : undefined}
+          >
+            <Input
+              id="password"
+              type="password"
+              required
+              minLength={mode === "register" ? 8 : undefined}
+              autoComplete={mode === "register" ? "new-password" : "current-password"}
+              aria-invalid={!!errors.password}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+            />
+          </Field>
+          <Button type="submit" className="w-full" loading={mutation.isPending}>
+            {mode === "login" ? "Sign in" : "Create account"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

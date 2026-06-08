@@ -1,186 +1,142 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { AlertTriangle, CreditCard, TrendingUp, Wallet } from "lucide-react";
 
 import { useDashboardStats } from "@/features/dashboard/hooks";
+import { RevenueChart, StatusChart, TagChart } from "@/features/dashboard/components/charts";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
+import { Skeleton } from "@/components/ui/skeleton";
+import { StatCard } from "@/components/ui/stat-card";
+import { cn } from "@/lib/utils";
 import { formatIDR } from "@/lib/format";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
 });
 
-const STATUS_COLORS = ["#10b981", "#f59e0b", "#94a3b8"];
+function DashboardPage() {
+  const { data, isLoading } = useDashboardStats();
 
-function Card({
-  title,
-  children,
-  className = "",
-}: {
-  title?: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
   return (
-    <div
-      className={`rounded-xl border border-slate-200 bg-white p-4 ${className}`}
-    >
-      {title && (
-        <div className="mb-3 text-sm font-semibold text-slate-700">{title}</div>
+    <div className="space-y-6">
+      <PageHeader title="Dashboard" subtitle="Inventory, sales & credit at a glance." />
+
+      {isLoading || !data ? (
+        <LoadingState />
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div className="reveal reveal-1">
+              <StatCard
+                label="Revenue"
+                value={formatIDR(data.sales.revenue)}
+                icon={TrendingUp}
+                tone="accent"
+                hint={`${data.sales.count} sales`}
+              />
+            </div>
+            <div className="reveal reveal-2">
+              <StatCard
+                label="Profit"
+                value={formatIDR(data.sales.profit)}
+                icon={Wallet}
+                tone="positive"
+              />
+            </div>
+            <div className="reveal reveal-3">
+              <StatCard
+                label="Outstanding credit"
+                value={formatIDR(data.credit.outstanding)}
+                icon={CreditCard}
+                tone="warning"
+              />
+            </div>
+            <div className="reveal reveal-4">
+              <StatCard
+                label="Overdue installments"
+                value={String(data.credit.overdue_installments)}
+                icon={AlertTriangle}
+                tone={data.credit.overdue_installments > 0 ? "negative" : "default"}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <MiniStat label="Cash sales" value={String(data.sales.cash)} />
+            <MiniStat label="Credit sales" value={String(data.sales.credit)} />
+            <MiniStat label="Stock value" value={formatIDR(data.inventory.available_buy_value)} />
+            <MiniStat
+              label="Inventory"
+              value={`${data.inventory.available} / ${data.inventory.reserved} / ${data.inventory.sold}`}
+              hint="avail · resv · sold"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <Card className="reveal lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Revenue by month</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RevenueChart data={data.revenue_by_month} />
+              </CardContent>
+            </Card>
+            <Card className="reveal">
+              <CardHeader>
+                <CardTitle>Inventory status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <StatusChart
+                  available={data.inventory.available}
+                  reserved={data.inventory.reserved}
+                  sold={data.inventory.sold}
+                />
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="reveal">
+            <CardHeader>
+              <CardTitle>Sales by tag</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TagChart data={data.sales_by_tag} />
+            </CardContent>
+          </Card>
+        </>
       )}
-      {children}
     </div>
   );
 }
 
-function Metric({
-  label,
-  value,
-  accent = "text-slate-800",
-}: {
-  label: string;
-  value: string;
-  accent?: string;
-}) {
+function MiniStat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <Card>
-      <div className="text-xs uppercase text-slate-500">{label}</div>
-      <div className={`mt-1 text-2xl font-semibold tabular-nums ${accent}`}>
-        {value}
+    <div className="rounded-[var(--radius-lg)] border border-border bg-surface p-4 shadow-card">
+      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {label}
       </div>
-    </Card>
+      <div className="tabular mt-1 text-lg font-semibold text-foreground">{value}</div>
+      {hint && <div className="text-[0.7rem] text-muted-foreground">{hint}</div>}
+    </div>
   );
 }
 
-function DashboardPage() {
-  const { data, isLoading } = useDashboardStats();
-
-  if (isLoading || !data) {
-    return <p className="text-slate-400">Loading…</p>;
-  }
-
-  const statusData = [
-    { name: "Available", value: data.inventory.available },
-    { name: "Reserved", value: data.inventory.reserved },
-    { name: "Sold", value: data.inventory.sold },
-  ].filter((d) => d.value > 0);
-
-  const revenueData = data.revenue_by_month.map((r) => ({
-    month: r.month,
-    revenue: Number(r.revenue),
-  }));
-
+function LoadingState() {
   return (
-    <div>
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
-
-      <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Metric label="Revenue" value={formatIDR(data.sales.revenue)} />
-        <Metric
-          label="Profit"
-          value={formatIDR(data.sales.profit)}
-          accent="text-emerald-600"
-        />
-        <Metric
-          label="Outstanding credit"
-          value={formatIDR(data.credit.outstanding)}
-          accent="text-amber-600"
-        />
-        <Metric
-          label="Overdue installments"
-          value={String(data.credit.overdue_installments)}
-          accent={
-            data.credit.overdue_installments > 0
-              ? "text-rose-600"
-              : "text-slate-800"
-          }
-        />
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-28" />
+        ))}
       </div>
-
-      <div className="mt-3 grid grid-cols-2 gap-3 text-sm text-slate-600 lg:grid-cols-4">
-        <Card>
-          {data.sales.count} sales · {data.sales.cash} cash / {data.sales.credit}{" "}
-          credit
-        </Card>
-        <Card>
-          Stock value (available):{" "}
-          <span className="font-medium text-slate-800">
-            {formatIDR(data.inventory.available_buy_value)}
-          </span>
-        </Card>
-        <Card className="col-span-2">
-          {data.inventory.available} available · {data.inventory.reserved}{" "}
-          reserved · {data.inventory.sold} sold
-        </Card>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-20" />
+        ))}
       </div>
-
-      <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-3">
-        <Card title="Revenue by month" className="lg:col-span-2">
-          <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={revenueData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="month" fontSize={12} stroke="#94a3b8" />
-              <YAxis
-                fontSize={12}
-                stroke="#94a3b8"
-                tickFormatter={(v) => `${v / 1_000_000}jt`}
-              />
-              <Tooltip formatter={(v) => formatIDR(Number(v))} />
-              <Line
-                type="monotone"
-                dataKey="revenue"
-                stroke="#0f172a"
-                strokeWidth={2}
-                dot={{ r: 3 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </Card>
-
-        <Card title="Inventory status">
-          <ResponsiveContainer width="100%" height={240}>
-            <PieChart>
-              <Pie
-                data={statusData}
-                dataKey="value"
-                nameKey="name"
-                innerRadius={50}
-                outerRadius={80}
-                paddingAngle={2}
-              >
-                {statusData.map((_, i) => (
-                  <Cell key={i} fill={STATUS_COLORS[i % STATUS_COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </Card>
-      </div>
-
-      <div className="mt-3">
-        <Card title="Sales by tag">
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={data.sales_by_tag}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="tag" fontSize={12} stroke="#94a3b8" />
-              <YAxis fontSize={12} stroke="#94a3b8" allowDecimals={false} />
-              <Tooltip />
-              <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Skeleton className={cn("h-80", "lg:col-span-2")} />
+        <Skeleton className="h-80" />
       </div>
     </div>
   );

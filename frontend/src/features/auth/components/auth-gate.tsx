@@ -4,6 +4,7 @@ import { useAtom } from "jotai";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { ApiError } from "@/lib/api";
+import { useApplyTheme } from "@/lib/theme";
 import { me } from "@/features/auth/api";
 import { tokenAtom, userAtom } from "@/features/auth/state";
 
@@ -16,6 +17,7 @@ export function AuthGate() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const sessionExpiredFiredRef = useRef(false);
+  useApplyTheme();
 
   useEffect(() => {
     if (!token || user) return;

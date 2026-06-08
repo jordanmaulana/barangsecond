@@ -19,4 +19,13 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    // TanStack Router route files export `Route`; shadcn-style ui files
+    // re-export primitives alongside components. Both are intentional and
+    // incompatible with the fast-refresh single-export rule.
+    files: ['src/routes/**/*.tsx', 'src/components/ui/**/*.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ])

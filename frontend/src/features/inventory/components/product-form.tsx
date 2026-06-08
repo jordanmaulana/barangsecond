@@ -1,8 +1,15 @@
 import { useState } from "react";
+import { Plus } from "lucide-react";
 
 import { useCreateTag, useTags } from "@/features/inventory/hooks";
 import type { Product, ProductInput } from "@/features/inventory/types";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Field } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { formatIDR } from "@/lib/format";
 
 interface Props {
   initial?: Product;
@@ -10,26 +17,22 @@ interface Props {
   onSubmit: (data: ProductInput) => void;
 }
 
-const field =
-  "mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none";
-
 export function ProductForm({ initial, submitting, onSubmit }: Props) {
   const [title, setTitle] = useState(initial?.title ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [buyPrice, setBuyPrice] = useState(initial?.buy_price ?? "");
   const [sellPrice, setSellPrice] = useState(initial?.sell_price ?? "");
-  const [selected, setSelected] = useState<string[]>(
-    initial?.tags.map((t) => t.id) ?? [],
-  );
+  const [selected, setSelected] = useState<string[]>(initial?.tags.map((t) => t.id) ?? []);
   const [newTag, setNewTag] = useState("");
 
   const { data: tags } = useTags();
   const createTag = useCreateTag();
 
+  const profit = Number(sellPrice) - Number(buyPrice);
+  const profitValid = Number.isFinite(profit) && (buyPrice !== "" || sellPrice !== "");
+
   function toggle(id: string) {
-    setSelected((s) =>
-      s.includes(id) ? s.filter((x) => x !== id) : [...s, id],
-    );
+    setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
   }
 
   async function addTag() {
@@ -52,97 +55,117 @@ export function ProductForm({ initial, submitting, onSubmit }: Props) {
   }
 
   return (
-    <form onSubmit={submit} className="max-w-xl space-y-4">
-      <div>
-        <label className="text-sm font-medium text-slate-700">Title</label>
-        <input
-          className={field}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label className="text-sm font-medium text-slate-700">Description</label>
-        <textarea
-          className={field}
-          rows={3}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="text-sm font-medium text-slate-700">Buy price</label>
-          <input
-            type="number"
-            className={field}
-            value={buyPrice}
-            onChange={(e) => setBuyPrice(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium text-slate-700">Sell price</label>
-          <input
-            type="number"
-            className={field}
-            value={sellPrice}
-            onChange={(e) => setSellPrice(e.target.value)}
-            required
-          />
-        </div>
-      </div>
+    <Card className="max-w-2xl">
+      <CardContent className="p-6">
+        <form onSubmit={submit} className="space-y-5">
+          <Field label="Title" htmlFor="title" required>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="iPhone 13 Pro 256GB"
+              required
+            />
+          </Field>
 
-      <div>
-        <label className="text-sm font-medium text-slate-700">Tags</label>
-        <div className="mt-1 flex flex-wrap gap-1.5">
-          {tags?.map((t) => (
-            <button
+          <Field label="Description" htmlFor="desc">
+            <Textarea
+              id="desc"
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Condition, accessories, notes…"
+            />
+          </Field>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Buy price" htmlFor="buy" required>
+              <Input
+                id="buy"
+                type="number"
+                min="0"
+                value={buyPrice}
+                onChange={(e) => setBuyPrice(e.target.value)}
+                required
+              />
+            </Field>
+            <Field label="Sell price" htmlFor="sell" required>
+              <Input
+                id="sell"
+                type="number"
+                min="0"
+                value={sellPrice}
+                onChange={(e) => setSellPrice(e.target.value)}
+                required
+              />
+            </Field>
+          </div>
+
+          {profitValid && (
+            <div className="flex items-center justify-between rounded-[var(--radius-md)] bg-surface-muted px-4 py-3 text-sm">
+              <span className="text-muted-foreground">Projected profit</span>
+              <span
+                className={cn(
+                  "tabular font-semibold",
+                  profit >= 0 ? "text-positive" : "text-negative",
+                )}
+              >
+                {formatIDR(profit)}
+              </span>
+            </div>
+          )}
+
+          <Field label="Tags">
+            <div className="flex flex-wrap gap-1.5">
+              {tags?.map((t) => (
+                <button
+                  type="button"
+                  key={t.id}
+                  onClick={() => toggle(t.id)}
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                    selected.includes(t.id)
+                      ? "border-accent bg-accent-soft text-accent"
+                      : "border-border bg-surface text-muted-foreground hover:border-border-strong",
+                  )}
+                >
+                  {t.name}
+                </button>
+              ))}
+              {!tags?.length && <span className="text-xs text-muted-foreground">No tags yet.</span>}
+            </div>
+          </Field>
+
+          <div className="flex gap-2">
+            <Input
+              placeholder="New tag…"
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addTag();
+                }
+              }}
+            />
+            <Button
               type="button"
-              key={t.id}
-              onClick={() => toggle(t.id)}
-              className={cn(
-                "rounded-full px-3 py-1 text-xs font-medium",
-                selected.includes(t.id)
-                  ? "bg-slate-900 text-white"
-                  : "bg-white text-slate-600 ring-1 ring-slate-200",
-              )}
+              variant="secondary"
+              onClick={addTag}
+              loading={createTag.isPending}
+              className="shrink-0"
             >
-              {t.name}
-            </button>
-          ))}
-        </div>
-        <div className="mt-2 flex gap-2">
-          <input
-            className={field}
-            placeholder="New tag…"
-            value={newTag}
-            onChange={(e) => setNewTag(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addTag();
-              }
-            }}
-          />
-          <button
-            type="button"
-            onClick={addTag}
-            className="shrink-0 rounded-md border border-slate-300 px-3 text-sm text-slate-600 hover:bg-slate-50"
-          >
-            Add
-          </button>
-        </div>
-      </div>
+              <Plus className="h-4 w-4" /> Add
+            </Button>
+          </div>
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
-      >
-        {submitting ? "Saving…" : "Save product"}
-      </button>
-    </form>
+          <div className="flex justify-end border-t border-border pt-4">
+            <Button type="submit" loading={submitting}>
+              Save product
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

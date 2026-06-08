@@ -1,7 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ExternalLink, Plus, ShoppingCart } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { SearchInput } from "@/components/ui/search-input";
+import { NumCell, TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
+import { SkeletonRows } from "@/components/ui/skeleton";
 import { useSales } from "@/features/sales/hooks";
 import { formatDate, formatIDR } from "@/lib/format";
 
@@ -11,79 +18,100 @@ export const Route = createFileRoute("/sales")({
 
 function SalesPage() {
   const { data: sales, isLoading } = useSales();
+  const [query, setQuery] = useState("");
+
+  const rows = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return sales ?? [];
+    return (sales ?? []).filter(
+      (s) =>
+        s.product.title.toLowerCase().includes(q) ||
+        s.buyer_name?.toLowerCase().includes(q),
+    );
+  }, [sales, query]);
 
   return (
-    <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Sales</h1>
-        <Link
-          to="/products"
-          className="inline-flex items-center gap-1.5 rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
-        >
-          <Plus className="h-4 w-4" /> New sale
-        </Link>
+    <div className="space-y-6">
+      <PageHeader
+        title="Sales"
+        subtitle="Every cash & credit transaction."
+        actions={
+          <Button asChild>
+            <Link to="/sales/new">
+              <Plus className="h-4 w-4" /> New sale
+            </Link>
+          </Button>
+        }
+      />
+
+      <div className="flex justify-end">
+        <SearchInput
+          value={query}
+          onChange={setQuery}
+          placeholder="Search product or buyer…"
+          className="sm:w-72"
+        />
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+      <Table>
+        <THead>
+          <tr>
+            <TH>Product</TH>
+            <TH>Buyer</TH>
+            <TH>Type</TH>
+            <TH align="right">Price</TH>
+            <TH>Date</TH>
+            <TH align="right">Actions</TH>
+          </tr>
+        </THead>
+        <TBody>
+          {isLoading ? (
+            <SkeletonRows rows={6} cols={6} />
+          ) : rows.length === 0 ? (
             <tr>
-              <th className="px-4 py-3">Product</th>
-              <th className="px-4 py-3">Buyer</th>
-              <th className="px-4 py-3">Type</th>
-              <th className="px-4 py-3 text-right">Price</th>
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3"></th>
+              <td colSpan={6}>
+                <EmptyState
+                  icon={ShoppingCart}
+                  title={query ? "No matching sales" : "No sales yet"}
+                  hint={query ? "Try a different search." : "Record a sale from an available product."}
+                  action={
+                    !query ? (
+                      <Button asChild size="sm">
+                        <Link to="/sales/new">
+                          <Plus className="h-4 w-4" /> New sale
+                        </Link>
+                      </Button>
+                    ) : undefined
+                  }
+                />
+              </td>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {isLoading && (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
-                  Loading…
-                </td>
-              </tr>
-            )}
-            {sales?.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
-                  No sales yet.
-                </td>
-              </tr>
-            )}
-            {sales?.map((s) => (
-              <tr key={s.id} className="hover:bg-slate-50">
-                <td className="px-4 py-3 font-medium text-slate-800">
-                  {s.product.title}
-                </td>
-                <td className="px-4 py-3 text-slate-600">
-                  {s.buyer_name || "—"}
-                </td>
-                <td className="px-4 py-3">
-                  <Badge value={s.sale_type} />
-                </td>
-                <td className="px-4 py-3 text-right tabular-nums text-slate-600">
-                  {formatIDR(s.sale_price)}
-                </td>
-                <td className="px-4 py-3 text-slate-600">
-                  {formatDate(s.sold_on)}
-                </td>
-                <td className="px-4 py-3 text-right text-xs">
-                  {s.credit && (
-                    <Link
-                      to="/credits/$id"
-                      params={{ id: s.credit.id }}
-                      className="text-blue-600 hover:underline"
-                    >
-                      View credit
-                    </Link>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ) : (
+            rows.map((s) => (
+              <TR key={s.id}>
+                <TD className="font-medium">{s.product.title}</TD>
+                <TD className="text-muted-foreground">{s.buyer_name || "—"}</TD>
+                <TD>
+                  <Badge value={s.sale_type} label={s.sale_type === "credit" ? "Credit" : "Cash"} />
+                </TD>
+                <NumCell className="text-muted-foreground">{formatIDR(s.sale_price)}</NumCell>
+                <TD className="text-muted-foreground">{formatDate(s.sold_on)}</TD>
+                <TD>
+                  <div className="flex justify-end">
+                    {s.credit && (
+                      <Button asChild variant="ghost" size="sm">
+                        <Link to="/credits/$id" params={{ id: s.credit.id }}>
+                          Credit <ExternalLink className="h-3.5 w-3.5" />
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
+                </TD>
+              </TR>
+            ))
+          )}
+        </TBody>
+      </Table>
     </div>
   );
 }

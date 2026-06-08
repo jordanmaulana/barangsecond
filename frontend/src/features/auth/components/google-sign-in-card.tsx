@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "react-toastify";
 
 import { useGoogleSignIn } from "@/features/auth/hooks";
+import { useTheme } from "@/lib/theme";
 
 declare global {
   interface Window {
@@ -24,6 +25,7 @@ export function GoogleSignInCard() {
   const ref = useRef<HTMLDivElement>(null);
   const signIn = useGoogleSignIn();
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   useEffect(() => {
@@ -36,20 +38,20 @@ export function GoogleSignInCard() {
           onError: (err) => toast.error(err instanceof Error ? err.message : "Sign-in failed"),
         }),
     });
+    ref.current.innerHTML = "";
     window.google.accounts.id.renderButton(ref.current, {
       type: "standard",
-      theme: "outline",
+      theme: theme === "dark" ? "filled_black" : "outline",
       size: "large",
+      width: 320,
     });
-  }, [clientId, signIn, navigate]);
+  }, [clientId, signIn, navigate, theme]);
 
   return (
-    <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h1 className="text-xl font-semibold">Sign in</h1>
-      <p className="mt-1 text-sm text-slate-600">Continue with Google.</p>
-      <div ref={ref} className="mt-6 flex justify-center" />
+    <div className="flex flex-col items-center gap-3">
+      <div ref={ref} className="flex min-h-[40px] justify-center" />
       {!clientId && (
-        <p className="mt-4 text-xs text-red-600">VITE_GOOGLE_CLIENT_ID not set.</p>
+        <p className="text-xs text-negative">VITE_GOOGLE_CLIENT_ID not set.</p>
       )}
     </div>
   );

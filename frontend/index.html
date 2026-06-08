@@ -4,7 +4,18 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>App</title>
+    <title>barangsecond — inventory & credit</title>
+    <script>
+      // No-flash theme: apply persisted/OS theme before first paint.
+      (function () {
+        try {
+          var s = localStorage.getItem("bs-theme");
+          var t = s ? JSON.parse(s) : (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          if (t === "dark") document.documentElement.classList.add("dark");
+          document.documentElement.style.colorScheme = t;
+        } catch (e) {}
+      })();
+    </script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>
