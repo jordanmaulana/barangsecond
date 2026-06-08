@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AlertTriangle, CreditCard, TrendingUp, Wallet } from "lucide-react";
 
 import { useDashboardStats } from "@/features/dashboard/hooks";
-import { RevenueChart, StatusChart, TagChart } from "@/features/dashboard/components/charts";
+import { RevenueChart, StatusChart } from "@/features/dashboard/components/charts";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -61,17 +61,10 @@ function DashboardPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
             <MiniStat label="Cash sales" value={String(data.sales.cash)} />
             <MiniStat label="Credit sales" value={String(data.sales.credit)} />
             <MiniStat label="Stock value" value={formatIDR(data.inventory.available_buy_value)} />
-            <MiniStat
-              label="Inventory"
-              value={`${data.inventory.available} / ${data.inventory.ongoing_installment} / ${
-                data.inventory.sold_cash + data.inventory.installment_paid
-              }`}
-              hint="avail · ongoing · sold"
-            />
           </div>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -97,15 +90,6 @@ function DashboardPage() {
               </CardContent>
             </Card>
           </div>
-
-          <Card className="reveal">
-            <CardHeader>
-              <CardTitle>Sales by tag</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TagChart data={data.sales_by_tag} />
-            </CardContent>
-          </Card>
         </>
       )}
     </div>
@@ -132,8 +116,8 @@ function LoadingState() {
           <Skeleton key={i} className="h-28" />
         ))}
       </div>
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
           <Skeleton key={i} className="h-20" />
         ))}
       </div>

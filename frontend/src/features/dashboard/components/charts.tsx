@@ -1,6 +1,4 @@
 import {
-  Bar,
-  BarChart,
   CartesianGrid,
   Cell,
   Line,
@@ -97,42 +95,38 @@ export function StatusChart({
   }
 
   return (
-    <ResponsiveContainer width="100%" height={260}>
-      <PieChart>
-        <Pie
-          data={data}
-          dataKey="value"
-          nameKey="name"
-          innerRadius={56}
-          outerRadius={88}
-          paddingAngle={3}
-          stroke={c.surface}
-          strokeWidth={3}
-        >
-          {data.map((d) => (
-            <Cell key={d.name} fill={d.fill} />
-          ))}
-        </Pie>
-        <Tooltip content={<TooltipBox />} />
-      </PieChart>
-    </ResponsiveContainer>
-  );
-}
-
-export function TagChart({ data }: { data: { tag: string; count: number }[] }) {
-  const c = useChartColors();
-  if (!data.length) {
-    return <EmptyState icon={PieIcon} title="No sales by tag yet" className="py-16" />;
-  }
-  return (
-    <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke={c.border} vertical={false} />
-        <XAxis dataKey="tag" fontSize={11} stroke={c["muted-foreground"]} tickLine={false} axisLine={false} />
-        <YAxis fontSize={11} stroke={c["muted-foreground"]} tickLine={false} axisLine={false} allowDecimals={false} />
-        <Tooltip content={<TooltipBox />} cursor={{ fill: c.border, opacity: 0.3 }} />
-        <Bar dataKey="count" fill={c.accent} radius={[6, 6, 0, 0]} maxBarSize={56} />
-      </BarChart>
-    </ResponsiveContainer>
+    <div className="flex flex-col items-center gap-4">
+      <ResponsiveContainer width="100%" height={220}>
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            innerRadius={56}
+            outerRadius={88}
+            paddingAngle={3}
+            stroke={c.surface}
+            strokeWidth={3}
+          >
+            {data.map((d) => (
+              <Cell key={d.name} fill={d.fill} />
+            ))}
+          </Pie>
+          <Tooltip content={<TooltipBox />} />
+        </PieChart>
+      </ResponsiveContainer>
+      <ul className="flex w-full flex-col gap-2">
+        {data.map((d) => (
+          <li key={d.name} className="flex items-center gap-2 text-xs">
+            <span
+              className="h-2.5 w-2.5 shrink-0 rounded-full"
+              style={{ background: d.fill }}
+            />
+            <span className="text-muted-foreground">{d.name}</span>
+            <span className="tabular ml-auto font-medium text-foreground">{d.value}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

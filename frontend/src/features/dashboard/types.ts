@@ -18,5 +18,4 @@ export interface DashboardStats {
     overdue_installments: number;
   };
   revenue_by_month: { month: string; revenue: string }[];
-  sales_by_tag: { tag: string; count: number }[];
 }

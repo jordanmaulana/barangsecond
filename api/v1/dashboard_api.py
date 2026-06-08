@@ -66,15 +66,6 @@ def stats(request):
         if row["month"]
     ][-12:]
 
-    # Series: sales count by tag
-    from inventory.models import Tag
-
-    sales_by_tag = [
-        {"tag": row["name"], "count": row["n"]}
-        for row in Tag.objects.annotate(n=Count("products__sale")).values("name", "n")
-        if row["n"]
-    ]
-
     return Response(
         {
             "inventory": {
@@ -96,6 +87,5 @@ def stats(request):
                 "overdue_installments": overdue_count,
             },
             "revenue_by_month": revenue_by_month,
-            "sales_by_tag": sales_by_tag,
         }
     )
