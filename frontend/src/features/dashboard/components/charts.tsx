@@ -75,18 +75,21 @@ export function RevenueChart({ data }: { data: { month: string; revenue: string 
 
 export function StatusChart({
   available,
-  reserved,
-  sold,
+  soldCash,
+  ongoingInstallment,
+  installmentPaid,
 }: {
   available: number;
-  reserved: number;
-  sold: number;
+  soldCash: number;
+  ongoingInstallment: number;
+  installmentPaid: number;
 }) {
   const c = useChartColors();
   const data = [
     { name: "Available", value: available, fill: c.positive },
-    { name: "Reserved", value: reserved, fill: c.warning },
-    { name: "Sold", value: sold, fill: c["muted-foreground"] },
+    { name: "Sold (cash)", value: soldCash, fill: c["muted-foreground"] },
+    { name: "Installment", value: ongoingInstallment, fill: c.info },
+    { name: "Paid off", value: installmentPaid, fill: c.accent },
   ].filter((d) => d.value > 0);
 
   if (!data.length) {

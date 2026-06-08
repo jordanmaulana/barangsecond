@@ -82,8 +82,9 @@ def sales(request):
                 actor=request.user,
             )
             _build_installments(credit, sale.sold_on)
-
-        product.status = Product.Status.SOLD
+            product.status = Product.Status.ONGOING_INSTALLMENT
+        else:
+            product.status = Product.Status.SOLD_CASH
         product.save(update_fields=["status", "updated_on"])
 
     sale = (

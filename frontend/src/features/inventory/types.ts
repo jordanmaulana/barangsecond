@@ -1,4 +1,15 @@
-export type ProductStatus = "available" | "reserved" | "sold";
+export type ProductStatus =
+  | "available"
+  | "sold_cash"
+  | "ongoing_installment"
+  | "installment_paid";
+
+export const PRODUCT_STATUS_LABELS: Record<ProductStatus, string> = {
+  available: "Available",
+  sold_cash: "Sold (cash)",
+  ongoing_installment: "Installment",
+  installment_paid: "Paid off",
+};
 
 export interface Tag {
   id: string;

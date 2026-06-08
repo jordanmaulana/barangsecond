@@ -67,8 +67,10 @@ function DashboardPage() {
             <MiniStat label="Stock value" value={formatIDR(data.inventory.available_buy_value)} />
             <MiniStat
               label="Inventory"
-              value={`${data.inventory.available} / ${data.inventory.reserved} / ${data.inventory.sold}`}
-              hint="avail · resv · sold"
+              value={`${data.inventory.available} / ${data.inventory.ongoing_installment} / ${
+                data.inventory.sold_cash + data.inventory.installment_paid
+              }`}
+              hint="avail · ongoing · sold"
             />
           </div>
 
@@ -88,8 +90,9 @@ function DashboardPage() {
               <CardContent>
                 <StatusChart
                   available={data.inventory.available}
-                  reserved={data.inventory.reserved}
-                  sold={data.inventory.sold}
+                  soldCash={data.inventory.sold_cash}
+                  ongoingInstallment={data.inventory.ongoing_installment}
+                  installmentPaid={data.inventory.installment_paid}
                 />
               </CardContent>
             </Card>

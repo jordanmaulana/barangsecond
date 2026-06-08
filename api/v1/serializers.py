@@ -100,7 +100,7 @@ class ProductSerializer(serializers.ModelSerializer):
         read_only_fields = ["status"]
 
     def get_is_sold(self, obj):
-        return obj.status == Product.Status.SOLD
+        return obj.status != Product.Status.AVAILABLE
 
 
 class InstallmentSerializer(serializers.ModelSerializer):
@@ -174,7 +174,7 @@ class SaleInputSerializer(serializers.Serializer):
     credit = CreditInputSerializer(required=False)
 
     def validate(self, attrs):
-        if attrs["product"].status == Product.Status.SOLD:
+        if attrs["product"].status != Product.Status.AVAILABLE:
             raise serializers.ValidationError("Product is already sold")
         if attrs["sale_type"] == Sale.Type.CREDIT and not attrs.get("credit"):
             raise serializers.ValidationError("Credit details required for a credit sale")

@@ -34,7 +34,7 @@ class SaleFlowTests(APITestCase):
         self.assertEqual(res.status_code, 201, res.data)
         self.assertIsNone(res.data["credit"])
         p.refresh_from_db()
-        self.assertEqual(p.status, Product.Status.SOLD)
+        self.assertEqual(p.status, Product.Status.SOLD_CASH)
 
     def test_credit_sale_generates_schedule(self):
         p = self._product()
@@ -66,6 +66,39 @@ class SaleFlowTests(APITestCase):
         total = sum(Decimal(r["amount"]) for r in rows)
         self.assertEqual(total, Decimal("3000000.00"))
 
+    def test_credit_sale_marks_ongoing_then_paid_off(self):
+        p = self._product()
+        res = self.client.post(
+            "/api/v1/sales/",
+            {
+                "product": p.id,
+                "sale_type": "credit",
+                "sale_price": "4000000",
+                "sold_on": "2026-01-31",
+                "credit": {
+                    "total_price": "4000000",
+                    "down_payment": "1000000",
+                    "tenor_months": 3,
+                },
+            },
+            format="json",
+        )
+        self.assertEqual(res.status_code, 201, res.data)
+        p.refresh_from_db()
+        self.assertEqual(p.status, Product.Status.ONGOING_INSTALLMENT)
+
+        rows = res.data["credit"]["installments"]
+        for i, row in enumerate(rows):
+            pay = self.client.post(f"/api/v1/installments/{row['id']}/pay/")
+            self.assertEqual(pay.status_code, 200, pay.data)
+            p.refresh_from_db()
+            expected = (
+                Product.Status.INSTALLMENT_PAID
+                if i == len(rows) - 1
+                else Product.Status.ONGOING_INSTALLMENT
+            )
+            self.assertEqual(p.status, expected)
+
     def test_rounding_remainder_in_last_installment(self):
         p = self._product()
         res = self.client.post(
@@ -87,7 +120,7 @@ class SaleFlowTests(APITestCase):
 
     def test_cannot_sell_sold_product(self):
         p = self._product()
-        p.status = Product.Status.SOLD
+        p.status = Product.Status.SOLD_CASH
         p.save()
         res = self.client.post(
             "/api/v1/sales/",

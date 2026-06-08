@@ -13,6 +13,7 @@ import { Segmented } from "@/components/ui/segmented";
 import { NumCell, SortHeader, TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
 import { SkeletonRows } from "@/components/ui/skeleton";
 import { useDeleteProduct, useProducts } from "@/features/inventory/hooks";
+import { PRODUCT_STATUS_LABELS } from "@/features/inventory/types";
 import type { Product, ProductStatus } from "@/features/inventory/types";
 import { formatIDR } from "@/lib/format";
 
@@ -84,8 +85,9 @@ function ProductsPage() {
           options={[
             { value: "", label: "All" },
             { value: "available", label: "Available" },
-            { value: "reserved", label: "Reserved" },
-            { value: "sold", label: "Sold" },
+            { value: "sold_cash", label: "Sold (cash)" },
+            { value: "ongoing_installment", label: "Installment" },
+            { value: "installment_paid", label: "Paid off" },
           ]}
           value={status}
           onChange={(v) => setStatus(v as ProductStatus | "")}
@@ -152,7 +154,7 @@ function ProductsPage() {
                 <NumCell className="text-muted-foreground">{formatIDR(p.sell_price)}</NumCell>
                 <NumCell className="font-medium text-positive">{formatIDR(p.profit)}</NumCell>
                 <TD>
-                  <Badge value={p.status} />
+                  <Badge value={p.status} label={PRODUCT_STATUS_LABELS[p.status]} />
                 </TD>
                 <TD>
                   <div className="flex items-center justify-end gap-1">

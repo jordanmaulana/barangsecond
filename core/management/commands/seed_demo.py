@@ -281,10 +281,15 @@ class Command(BaseCommand):
                     credit, today, delinquent=sale_spec.get("delinquent", False)
                 )
                 counts["credit"] += 1
+                product.status = (
+                    Product.Status.INSTALLMENT_PAID
+                    if credit.is_settled
+                    else Product.Status.ONGOING_INSTALLMENT
+                )
             else:
                 counts["cash"] += 1
+                product.status = Product.Status.SOLD_CASH
 
-            product.status = Product.Status.SOLD
             product.save(update_fields=["status", "updated_on"])
 
         # Flip any still-due past installments (the delinquent credit) to overdue,

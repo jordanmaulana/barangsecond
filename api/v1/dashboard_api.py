@@ -79,8 +79,9 @@ def stats(request):
         {
             "inventory": {
                 "available": by_status.get(Product.Status.AVAILABLE, 0),
-                "reserved": by_status.get(Product.Status.RESERVED, 0),
-                "sold": by_status.get(Product.Status.SOLD, 0),
+                "sold_cash": by_status.get(Product.Status.SOLD_CASH, 0),
+                "ongoing_installment": by_status.get(Product.Status.ONGOING_INSTALLMENT, 0),
+                "installment_paid": by_status.get(Product.Status.INSTALLMENT_PAID, 0),
                 "available_buy_value": _money(available_buy_value),
             },
             "sales": {

@@ -1,8 +1,9 @@
 export interface DashboardStats {
   inventory: {
     available: number;
-    reserved: number;
-    sold: number;
+    sold_cash: number;
+    ongoing_installment: number;
+    installment_paid: number;
     available_buy_value: string;
   };
   sales: {

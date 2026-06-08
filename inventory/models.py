@@ -16,8 +16,9 @@ class Tag(BaseModel):
 class Product(BaseModel):
     class Status(models.TextChoices):
         AVAILABLE = "available", "Available"
-        RESERVED = "reserved", "Reserved"
-        SOLD = "sold", "Sold"
+        SOLD_CASH = "sold_cash", "Sold (cash)"
+        ONGOING_INSTALLMENT = "ongoing_installment", "Installment"
+        INSTALLMENT_PAID = "installment_paid", "Paid off"
 
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)

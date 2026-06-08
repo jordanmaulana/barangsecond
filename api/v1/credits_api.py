@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -6,6 +7,7 @@ from rest_framework.response import Response
 
 from api.v1.serializers import CreditSerializer, InstallmentSerializer
 from credit.models import Credit, Installment, mark_overdue
+from inventory.models import Product
 
 
 @api_view(["GET"])
@@ -40,8 +42,15 @@ def pay_installment(request, installment_id):
         return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
     if installment.status == Installment.Status.PAID:
         return Response({"detail": "Already paid"}, status=status.HTTP_400_BAD_REQUEST)
-    installment.status = Installment.Status.PAID
-    installment.paid_on = timezone.localdate()
-    installment.actor = request.user
-    installment.save(update_fields=["status", "paid_on", "actor", "updated_on"])
+    with transaction.atomic():
+        installment.status = Installment.Status.PAID
+        installment.paid_on = timezone.localdate()
+        installment.actor = request.user
+        installment.save(update_fields=["status", "paid_on", "actor", "updated_on"])
+        credit = installment.credit
+        if credit.is_settled:
+            product = credit.sale.product
+            if product.status == Product.Status.ONGOING_INSTALLMENT:
+                product.status = Product.Status.INSTALLMENT_PAID
+                product.save(update_fields=["status", "updated_on"])
     return Response(InstallmentSerializer(installment).data)
