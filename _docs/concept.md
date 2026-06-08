@@ -1,4 +1,4 @@
-# barangsecond.com
+# tokoseken.com
 
 ## Concept
 This is inventory management and dashboard that shows insights.
