@@ -21,7 +21,7 @@ function CreditDetailPage() {
   if (isLoading || !credit) {
     return (
       <div className="space-y-5">
-        <BackLink to="/credits" label="Kredit" />
+        <BackLink to="/credits" label="Cicil" />
         <Skeleton className="h-10 w-64" />
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -35,7 +35,7 @@ function CreditDetailPage() {
 
   return (
     <div className="space-y-6">
-      <BackLink to="/credits" label="Kredit" />
+      <BackLink to="/credits" label="Cicil" />
       <PageHeader
         title={credit.product_title}
         subtitle={`${credit.buyer_name || "—"} · terjual ${formatDate(credit.sold_on)} · ${credit.tenor_months} bulan`}

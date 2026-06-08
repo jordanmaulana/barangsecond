@@ -1,10 +1,12 @@
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from api.v1.pagination import StandardPagination
 from api.v1.serializers import CreditSerializer, InstallmentSerializer
 from credit.models import Credit, Installment, mark_overdue
 from inventory.models import Product
@@ -15,7 +17,15 @@ from inventory.models import Product
 def credits(request):
     mark_overdue(timezone.localdate())
     qs = Credit.objects.select_related("sale__product").prefetch_related("installments")
-    return Response(CreditSerializer(qs, many=True).data)
+    search = request.query_params.get("search", "").strip()
+    if search:
+        qs = qs.filter(
+            Q(sale__product__title__icontains=search) | Q(sale__buyer_name__icontains=search)
+        )
+    qs = qs.order_by("-sale__sold_on", "-created_on")
+    paginator = StandardPagination()
+    page = paginator.paginate_queryset(qs, request)
+    return paginator.get_paginated_response(CreditSerializer(page, many=True).data)
 
 
 @api_view(["GET"])

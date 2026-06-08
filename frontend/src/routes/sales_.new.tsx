@@ -21,7 +21,7 @@ function NewSalePage() {
   return (
     <div className="space-y-5">
       <BackLink to="/sales" label="Penjualan" />
-      <PageHeader title="Penjualan baru" subtitle="Catat penjualan tunai atau kredit syariah." />
+      <PageHeader title="Penjualan baru" subtitle="Catat penjualan tunai atau cicil syariah." />
       <SaleForm
         preselected={preselected}
         submitting={create.isPending}

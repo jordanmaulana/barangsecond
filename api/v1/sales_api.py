@@ -1,11 +1,13 @@
 from decimal import ROUND_HALF_UP, Decimal
 
 from django.db import transaction
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from api.v1.pagination import StandardPagination
 from api.v1.serializers import SaleInputSerializer, SaleSerializer
 from core.models import add_months
 from credit.models import Credit, Installment
@@ -47,7 +49,13 @@ def sales(request):
         qs = Sale.objects.select_related("product", "credit").prefetch_related(
             "product__tags", "credit__installments"
         )
-        return Response(SaleSerializer(qs, many=True).data)
+        search = request.query_params.get("search", "").strip()
+        if search:
+            qs = qs.filter(Q(product__title__icontains=search) | Q(buyer_name__icontains=search))
+        qs = qs.order_by("-sold_on", "-created_on")
+        paginator = StandardPagination()
+        page = paginator.paginate_queryset(qs, request)
+        return paginator.get_paginated_response(SaleSerializer(page, many=True).data)
 
     serializer = SaleInputSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)

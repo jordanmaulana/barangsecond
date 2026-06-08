@@ -26,7 +26,9 @@ interface Props {
 type Errors = Partial<Record<"product" | "salePrice" | "total" | "down" | "tenor", string>>;
 
 export function SaleForm({ preselected, submitting, onSubmit }: Props) {
-  const { data: products } = useProducts({ status: "available" });
+  // Picker for available stock — pull the max page (endpoint is paginated).
+  const { data: productPage } = useProducts({ status: "available", page_size: 50 });
+  const products = productPage?.results;
 
   const [productId, setProductId] = useState(preselected ?? "");
   const [saleType, setSaleType] = useState<SaleType>("cash");
@@ -72,12 +74,12 @@ export function SaleForm({ preselected, submitting, onSubmit }: Props) {
       buyer_phone: buyerPhone,
       ...(saleType === "credit"
         ? {
-            credit: {
-              total_price: totalPrice,
-              down_payment: downPayment || "0",
-              tenor_months: tenorN,
-            },
-          }
+          credit: {
+            total_price: totalPrice,
+            down_payment: downPayment || "0",
+            tenor_months: tenorN,
+          },
+        }
         : {}),
     });
   }
@@ -112,7 +114,7 @@ export function SaleForm({ preselected, submitting, onSubmit }: Props) {
               className="w-full"
               options={[
                 { value: "cash", label: "Tunai" },
-                { value: "credit", label: "Kredit syariah" },
+                { value: "credit", label: "Cicil syariah" },
               ]}
               value={saleType}
               onChange={(v) => setSaleType(v as SaleType)}

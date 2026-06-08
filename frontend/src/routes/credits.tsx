@@ -1,15 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { CreditCard, ExternalLink } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { Pagination } from "@/components/ui/pagination";
 import { SearchInput } from "@/components/ui/search-input";
 import { NumCell, TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
 import { SkeletonRows } from "@/components/ui/skeleton";
 import { useCredits } from "@/features/credit/hooks";
+import { useDebounced } from "@/lib/use-debounced";
 import { formatIDR } from "@/lib/format";
 
 export const Route = createFileRoute("/credits")({
@@ -17,22 +19,29 @@ export const Route = createFileRoute("/credits")({
 });
 
 function CreditsPage() {
-  const { data: credits, isLoading } = useCredits();
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
-  const rows = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return credits ?? [];
-    return (credits ?? []).filter(
-      (c) =>
-        c.product_title.toLowerCase().includes(q) ||
-        c.buyer_name?.toLowerCase().includes(q),
-    );
-  }, [credits, query]);
+  const search = useDebounced(query.trim(), 300);
+  // Reset to first page on filter change (render-phase state adjustment).
+  const filterKey = `${search}|${pageSize}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
+    setPage(1);
+  }
+
+  const { data, isLoading } = useCredits({
+    page,
+    page_size: pageSize,
+    search: search || undefined,
+  });
+  const rows = data?.results ?? [];
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Kredit" subtitle="Penjualan kredit syariah & jadwalnya." />
+      <PageHeader title="Cicil" subtitle="Penjualan cicil syariah & jadwalnya." />
 
       <div className="flex justify-end">
         <SearchInput
@@ -63,8 +72,8 @@ function CreditsPage() {
               <td colSpan={7}>
                 <EmptyState
                   icon={CreditCard}
-                  title={query ? "Tidak ada kredit cocok" : "Belum ada penjualan kredit"}
-                  hint={query ? "Coba pencarian lain." : "Penjualan kredit muncul di sini otomatis."}
+                  title={query ? "Tidak ada cicil cocok" : "Belum ada penjualan cicil"}
+                  hint={query ? "Coba pencarian lain." : "Penjualan cicil muncul di sini otomatis."}
                 />
               </td>
             </tr>
@@ -96,6 +105,15 @@ function CreditsPage() {
           )}
         </TBody>
       </Table>
+
+      <Pagination
+        page={page}
+        totalPages={data?.total_pages ?? 1}
+        count={data?.count ?? 0}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+      />
     </div>
   );
 }

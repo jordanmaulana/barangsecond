@@ -1,15 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ExternalLink, Plus, ShoppingCart } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { Pagination } from "@/components/ui/pagination";
 import { SearchInput } from "@/components/ui/search-input";
 import { NumCell, TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
 import { SkeletonRows } from "@/components/ui/skeleton";
 import { useSales } from "@/features/sales/hooks";
+import { useDebounced } from "@/lib/use-debounced";
 import { formatDate, formatIDR } from "@/lib/format";
 
 export const Route = createFileRoute("/sales")({
@@ -17,24 +19,31 @@ export const Route = createFileRoute("/sales")({
 });
 
 function SalesPage() {
-  const { data: sales, isLoading } = useSales();
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
-  const rows = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return sales ?? [];
-    return (sales ?? []).filter(
-      (s) =>
-        s.product.title.toLowerCase().includes(q) ||
-        s.buyer_name?.toLowerCase().includes(q),
-    );
-  }, [sales, query]);
+  const search = useDebounced(query.trim(), 300);
+  // Reset to first page on filter change (render-phase state adjustment).
+  const filterKey = `${search}|${pageSize}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
+    setPage(1);
+  }
+
+  const { data, isLoading } = useSales({
+    page,
+    page_size: pageSize,
+    search: search || undefined,
+  });
+  const rows = data?.results ?? [];
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Penjualan"
-        subtitle="Setiap transaksi tunai & kredit."
+        subtitle="Setiap transaksi tunai & cicil."
         actions={
           <Button asChild>
             <Link to="/sales/new">
@@ -92,7 +101,7 @@ function SalesPage() {
                 <TD className="font-medium">{s.product.title}</TD>
                 <TD className="text-muted-foreground">{s.buyer_name || "—"}</TD>
                 <TD>
-                  <Badge value={s.sale_type} label={s.sale_type === "credit" ? "Kredit" : "Tunai"} />
+                  <Badge value={s.sale_type} label={s.sale_type === "credit" ? "Cicil" : "Tunai"} />
                 </TD>
                 <NumCell className="text-muted-foreground">{formatIDR(s.sale_price)}</NumCell>
                 <TD className="text-muted-foreground">{formatDate(s.sold_on)}</TD>
@@ -101,7 +110,7 @@ function SalesPage() {
                     {s.credit && (
                       <Button asChild variant="ghost" size="sm">
                         <Link to="/credits/$id" params={{ id: s.credit.id }}>
-                          Kredit <ExternalLink className="h-3.5 w-3.5" />
+                          Cicil <ExternalLink className="h-3.5 w-3.5" />
                         </Link>
                       </Button>
                     )}
@@ -112,6 +121,15 @@ function SalesPage() {
           )}
         </TBody>
       </Table>
+
+      <Pagination
+        page={page}
+        totalPages={data?.total_pages ?? 1}
+        count={data?.count ?? 0}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+      />
     </div>
   );
 }

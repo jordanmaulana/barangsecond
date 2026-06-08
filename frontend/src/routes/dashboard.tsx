@@ -10,6 +10,7 @@ import {
   StatusChart,
 } from "@/features/dashboard/components/charts";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { InfoHint } from "@/components/ui/info-hint";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatCard } from "@/components/ui/stat-card";
@@ -28,7 +29,7 @@ function DashboardPage() {
   if (isLoading || !data) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Dasbor" subtitle="Inventaris, penjualan & kredit sekilas." />
+        <PageHeader title="Dasbor" subtitle="Inventaris, penjualan & cicil sekilas." />
         <LoadingState />
       </div>
     );
@@ -56,7 +57,7 @@ function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Dasbor" subtitle="Inventaris, penjualan & kredit sekilas." />
+      <PageHeader title="Dasbor" subtitle="Inventaris, penjualan & cicil sekilas." />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div className="reveal reveal-1">
@@ -66,6 +67,7 @@ function DashboardPage() {
             icon={TrendingUp}
             tone="accent"
             hint={`${data.sales.count} penjualan`}
+            info="Total harga jual dari semua penjualan."
           />
         </div>
         <div className="reveal reveal-2">
@@ -75,14 +77,16 @@ function DashboardPage() {
             icon={Wallet}
             tone="positive"
             hint={`margin ${formatPercent(margin)}`}
+            info="Pendapatan dikurangi harga beli — keuntungan bersih."
           />
         </div>
         <div className="reveal reveal-3">
           <StatCard
-            label="Sisa kredit"
+            label="Sisa cicil"
             value={formatIDR(data.credit.outstanding)}
             icon={CreditCard}
             tone="warning"
+            info="Total cicilan yang belum dibayar dari penjualan cicil."
           />
         </div>
         <div className="reveal reveal-4">
@@ -92,22 +96,47 @@ function DashboardPage() {
             icon={AlertTriangle}
             tone={data.credit.overdue_installments > 0 ? "negative" : "default"}
             hint={`${formatIDR(data.credit.overdue_amount)} berisiko`}
+            info="Jumlah cicilan yang lewat jatuh tempo & belum dibayar."
           />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-        <MiniStat label="Penjualan tunai" value={String(data.sales.cash)} />
-        <MiniStat label="Penjualan kredit" value={String(data.sales.credit)} />
-        <MiniStat label="Nilai stok" value={formatIDR(data.inventory.available_buy_value)} />
-        <MiniStat label="Rasio tepat waktu" value={formatPercent(onTime)} hint={`${data.credit.paid_total} lunas`} />
-        <MiniStat label="Rata-rata hari terjual" value={avgDays == null ? "—" : `${avgDays} hr`} />
+        <MiniStat
+          label="Penjualan tunai"
+          value={String(data.sales.cash)}
+          info="Jumlah transaksi yang dibayar tunai."
+        />
+        <MiniStat
+          label="Penjualan cicil"
+          value={String(data.sales.credit)}
+          info="Jumlah transaksi lewat cicil syariah."
+        />
+        <MiniStat
+          label="Nilai stok"
+          value={formatIDR(data.inventory.available_buy_value)}
+          info="Total harga beli barang yang masih tersedia."
+        />
+        <MiniStat
+          label="Rasio tepat waktu"
+          value={formatPercent(onTime)}
+          hint={`${data.credit.paid_total} lunas`}
+          info="Persentase cicilan dibayar tepat/sebelum jatuh tempo."
+        />
+        <MiniStat
+          label="Rata-rata hari terjual"
+          value={avgDays == null ? "—" : `${avgDays} hr`}
+          info="Rata-rata lama barang dari masuk stok sampai terjual."
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="reveal lg:col-span-2">
           <CardHeader>
-            <CardTitle>Pendapatan & laba per bulan</CardTitle>
+            <div className="flex items-center gap-1.5">
+              <CardTitle>Pendapatan & laba per bulan</CardTitle>
+              <InfoHint text="Tren pendapatan dan laba tiap bulan." />
+            </div>
           </CardHeader>
           <CardContent>
             <RevenueChart data={data.revenue_by_month} />
@@ -115,7 +144,10 @@ function DashboardPage() {
         </Card>
         <Card className="reveal">
           <CardHeader>
-            <CardTitle>Status inventaris</CardTitle>
+            <div className="flex items-center gap-1.5">
+              <CardTitle>Status inventaris</CardTitle>
+              <InfoHint text="Sebaran barang: tersedia, terjual tunai, cicil berjalan, cicil lunas." />
+            </div>
           </CardHeader>
           <CardContent>
             <StatusChart
@@ -131,7 +163,10 @@ function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="reveal lg:col-span-2">
           <CardHeader>
-            <CardTitle>Prakiraan penagihan</CardTitle>
+            <div className="flex items-center gap-1.5">
+              <CardTitle>Prakiraan penagihan</CardTitle>
+              <InfoHint text="Perkiraan cicilan yang akan tertagih tiap bulan ke depan." />
+            </div>
           </CardHeader>
           <CardContent>
             <CollectionsChart
@@ -142,7 +177,10 @@ function DashboardPage() {
         </Card>
         <Card className="reveal">
           <CardHeader>
-            <CardTitle>Umur tunggakan</CardTitle>
+            <div className="flex items-center gap-1.5">
+              <CardTitle>Umur tunggakan</CardTitle>
+              <InfoHint text="Nilai cicilan terlambat dikelompokkan per rentang hari." />
+            </div>
           </CardHeader>
           <CardContent>
             <AgingBars items={agingItems} />
@@ -153,7 +191,10 @@ function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="reveal lg:col-span-2">
           <CardHeader>
-            <CardTitle>Laba per kategori</CardTitle>
+            <div className="flex items-center gap-1.5">
+              <CardTitle>Laba per kategori</CardTitle>
+              <InfoHint text="Laba dijumlahkan per kategori/tag produk." />
+            </div>
           </CardHeader>
           <CardContent>
             <ProfitByTagChart data={data.sales.profit_by_tag} />
@@ -161,7 +202,10 @@ function DashboardPage() {
         </Card>
         <Card className="reveal">
           <CardHeader>
-            <CardTitle>Umur stok</CardTitle>
+            <div className="flex items-center gap-1.5">
+              <CardTitle>Umur stok</CardTitle>
+              <InfoHint text="Nilai beli stok tersedia dikelompokkan per lama disimpan." />
+            </div>
           </CardHeader>
           <CardContent>
             <AgingBars items={stockItems} />
@@ -172,11 +216,22 @@ function DashboardPage() {
   );
 }
 
-function MiniStat({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function MiniStat({
+  label,
+  value,
+  hint,
+  info,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  info?: string;
+}) {
   return (
     <div className="rounded-[var(--radius-lg)] border border-border bg-surface p-4 shadow-card">
-      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <div className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {label}
+        {info && <InfoHint text={info} />}
       </div>
       <div className="tabular mt-1 text-lg font-semibold text-foreground">{value}</div>
       {hint && <div className="text-[0.7rem] text-muted-foreground">{hint}</div>}

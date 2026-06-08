@@ -1,6 +1,7 @@
 import { ArrowDownRight, ArrowUpRight, type LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { InfoHint } from "@/components/ui/info-hint";
 
 type Tone = "default" | "positive" | "warning" | "negative" | "accent";
 
@@ -19,6 +20,7 @@ export function StatCard({
   tone = "default",
   trend,
   hint,
+  info,
   className,
 }: {
   label: string;
@@ -27,6 +29,7 @@ export function StatCard({
   tone?: Tone;
   trend?: { value: string; up: boolean };
   hint?: string;
+  info?: string;
   className?: string;
 }) {
   return (
@@ -37,8 +40,9 @@ export function StatCard({
       )}
     >
       <div className="flex items-start justify-between">
-        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {label}
+          {info && <InfoHint text={info} />}
         </span>
         {Icon && (
           <span className={cn("flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)]", ICON_TONE[tone])}>

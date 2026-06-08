@@ -1,10 +1,15 @@
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from api.v1.pagination import StandardPagination
 from api.v1.serializers import ProductSerializer
 from inventory.models import Product
+
+# DB-backed columns the UI may sort by (profit is a Python property, not orderable).
+PRODUCT_ORDER_FIELDS = {"title", "buy_price", "sell_price"}
 
 
 @api_view(["GET", "POST"])
@@ -23,7 +28,18 @@ def products(request):
     tag = request.query_params.get("tag")
     if tag:
         qs = qs.filter(tags__id=tag)
-    return Response(ProductSerializer(qs, many=True).data)
+    search = request.query_params.get("search", "").strip()
+    if search:
+        qs = qs.filter(Q(title__icontains=search) | Q(tags__name__icontains=search)).distinct()
+
+    ordering = request.query_params.get("ordering", "title")
+    if ordering.lstrip("-") not in PRODUCT_ORDER_FIELDS:
+        ordering = "title"
+    qs = qs.order_by(ordering, "-created_on")
+
+    paginator = StandardPagination()
+    page = paginator.paginate_queryset(qs, request)
+    return paginator.get_paginated_response(ProductSerializer(page, many=True).data)
 
 
 @api_view(["GET", "PUT", "DELETE"])

@@ -6,8 +6,8 @@ import { GoogleSignInCard } from "@/features/auth/components/google-sign-in-card
 
 const HIGHLIGHTS = [
   { icon: Package, text: "Lacak setiap barang — HP, mobil, apa saja." },
-  { icon: CreditCard, text: "Tunai atau kredit syariah dengan jadwal cicilan otomatis." },
-  { icon: LineChart, text: "Wawasan langsung pendapatan, laba & sisa kredit." },
+  { icon: CreditCard, text: "Tunai atau cicil syariah dengan jadwal cicilan otomatis." },
+  { icon: LineChart, text: "Wawasan langsung pendapatan, laba & sisa cicil." },
 ];
 
 export const Route = createFileRoute("/login")({
@@ -36,7 +36,7 @@ function LoginPage() {
           <h1 className="font-display text-4xl font-semibold leading-tight tracking-tight">
             Stok bekas,
             <br />
-            penjualan & kredit —
+            penjualan & cicil —
             <br />
             dalam satu buku besar.
           </h1>
@@ -61,7 +61,7 @@ function LoginPage() {
             <span className="font-display text-2xl font-semibold tracking-tight text-foreground">
               barangsecond
             </span>
-            <p className="text-sm text-muted-foreground">Pelacak inventaris, penjualan & kredit.</p>
+            <p className="text-sm text-muted-foreground">Pelacak inventaris, penjualan & cicil.</p>
           </div>
           <EmailAuthCard />
           <div className="flex items-center gap-3 text-xs text-muted-foreground">

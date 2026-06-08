@@ -1,11 +1,21 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import { getCredit, listCredits, payInstallment } from "@/features/credit/api";
+import type { ListParams } from "@/lib/api";
 
 const CREDITS = ["credit", "credits"];
 
-export function useCredits() {
-  return useQuery({ queryKey: CREDITS, queryFn: listCredits });
+export function useCredits(params?: ListParams) {
+  return useQuery({
+    queryKey: [...CREDITS, params ?? {}],
+    queryFn: () => listCredits(params),
+    placeholderData: keepPreviousData,
+  });
 }
 
 export function useCredit(id: string) {

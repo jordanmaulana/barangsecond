@@ -1,15 +1,18 @@
-import { api } from "@/lib/api";
+import { api, appendListParams } from "@/lib/api";
+import type { ListParams, PaginatedResponse } from "@/lib/api";
 import type { Product, ProductInput, Tag } from "@/features/inventory/types";
 
-export function listProducts(params?: {
-  status?: string;
-  tag?: string;
-}): Promise<Product[]> {
+export type ProductListParams = ListParams & { status?: string; tag?: string };
+
+export function listProducts(
+  params?: ProductListParams,
+): Promise<PaginatedResponse<Product>> {
   const q = new URLSearchParams();
   if (params?.status) q.set("status", params.status);
   if (params?.tag) q.set("tag", params.tag);
+  appendListParams(q, params);
   const qs = q.toString();
-  return api<Product[]>(`/products/${qs ? `?${qs}` : ""}`);
+  return api<PaginatedResponse<Product>>(`/products/${qs ? `?${qs}` : ""}`);
 }
 
 export function getProduct(id: string): Promise<Product> {

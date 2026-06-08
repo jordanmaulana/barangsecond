@@ -18,7 +18,7 @@ const NAV: { to: string; label: string; icon: LucideIcon }[] = [
   { to: "/dashboard", label: "Dasbor", icon: LayoutDashboard },
   { to: "/products", label: "Inventaris", icon: Package },
   { to: "/sales", label: "Penjualan", icon: ShoppingCart },
-  { to: "/credits", label: "Kredit", icon: CreditCard },
+  { to: "/credits", label: "Cicil", icon: CreditCard },
 ];
 
 function isActive(pathname: string, to: string) {

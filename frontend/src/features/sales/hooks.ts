@@ -1,12 +1,22 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import { createSale, getSale, listSales } from "@/features/sales/api";
 import type { SaleInput } from "@/features/sales/types";
+import type { ListParams } from "@/lib/api";
 
 const SALES = ["sales"];
 
-export function useSales() {
-  return useQuery({ queryKey: SALES, queryFn: listSales });
+export function useSales(params?: ListParams) {
+  return useQuery({
+    queryKey: [...SALES, params ?? {}],
+    queryFn: () => listSales(params),
+    placeholderData: keepPreviousData,
+  });
 }
 
 export function useSale(id: string) {

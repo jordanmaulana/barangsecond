@@ -1,8 +1,14 @@
-import { api } from "@/lib/api";
+import { api, appendListParams } from "@/lib/api";
+import type { ListParams, PaginatedResponse } from "@/lib/api";
 import type { Sale, SaleInput } from "@/features/sales/types";
 
-export function listSales(): Promise<Sale[]> {
-  return api<Sale[]>("/sales/");
+export function listSales(
+  params?: ListParams,
+): Promise<PaginatedResponse<Sale>> {
+  const q = new URLSearchParams();
+  appendListParams(q, params);
+  const qs = q.toString();
+  return api<PaginatedResponse<Sale>>(`/sales/${qs ? `?${qs}` : ""}`);
 }
 
 export function getSale(id: string): Promise<Sale> {

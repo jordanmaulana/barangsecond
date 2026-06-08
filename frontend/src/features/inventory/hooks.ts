@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import {
   createProduct,
@@ -8,16 +13,18 @@ import {
   listProducts,
   listTags,
   updateProduct,
+  type ProductListParams,
 } from "@/features/inventory/api";
 import type { ProductInput } from "@/features/inventory/types";
 
 const PRODUCTS = ["inventory", "products"];
 const TAGS = ["inventory", "tags"];
 
-export function useProducts(params?: { status?: string; tag?: string }) {
+export function useProducts(params?: ProductListParams) {
   return useQuery({
     queryKey: [...PRODUCTS, params ?? {}],
     queryFn: () => listProducts(params),
+    placeholderData: keepPreviousData,
   });
 }
 

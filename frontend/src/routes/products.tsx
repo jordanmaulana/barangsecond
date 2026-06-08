@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Package, Pencil, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { Pagination } from "@/components/ui/pagination";
 import { SearchInput } from "@/components/ui/search-input";
 import { Segmented } from "@/components/ui/segmented";
 import { NumCell, SortHeader, TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
@@ -15,13 +16,15 @@ import { SkeletonRows } from "@/components/ui/skeleton";
 import { useDeleteProduct, useProducts } from "@/features/inventory/hooks";
 import { PRODUCT_STATUS_LABELS } from "@/features/inventory/types";
 import type { Product, ProductStatus } from "@/features/inventory/types";
+import { useDebounced } from "@/lib/use-debounced";
 import { formatIDR } from "@/lib/format";
 
 export const Route = createFileRoute("/products")({
   component: ProductsPage,
 });
 
-type SortKey = "title" | "buy_price" | "sell_price" | "profit";
+// profit is a computed property, not a DB column, so it can't be sorted server-side.
+type SortKey = "title" | "buy_price" | "sell_price";
 
 function ProductsPage() {
   const [status, setStatus] = useState<ProductStatus | "">("");
@@ -30,27 +33,32 @@ function ProductsPage() {
     key: "title",
     dir: "asc",
   });
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [toDelete, setToDelete] = useState<Product | null>(null);
 
-  const { data: products, isLoading } = useProducts(status ? { status } : undefined);
+  const search = useDebounced(query.trim(), 300);
+  const ordering = `${sort.dir === "desc" ? "-" : ""}${sort.key}`;
+
+  // Reset to the first page whenever the filter/sort/page-size changes
+  // (render-phase state adjustment — preferred over a useEffect).
+  const filterKey = `${status}|${search}|${ordering}|${pageSize}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
+    setPage(1);
+  }
+
+  const { data, isLoading } = useProducts({
+    page,
+    page_size: pageSize,
+    search: search || undefined,
+    ordering,
+    status: status || undefined,
+  });
   const del = useDeleteProduct();
 
-  const rows = useMemo(() => {
-    let list = products ?? [];
-    const q = query.trim().toLowerCase();
-    if (q) {
-      list = list.filter(
-        (p) =>
-          p.title.toLowerCase().includes(q) ||
-          p.tags.some((t) => t.name.toLowerCase().includes(q)),
-      );
-    }
-    const dir = sort.dir === "asc" ? 1 : -1;
-    return [...list].sort((a, b) => {
-      if (sort.key === "title") return a.title.localeCompare(b.title) * dir;
-      return (Number(a[sort.key]) - Number(b[sort.key])) * dir;
-    });
-  }, [products, query, sort]);
+  const rows = data?.results ?? [];
 
   function toggleSort(key: SortKey) {
     setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }));
@@ -107,7 +115,7 @@ function ProductsPage() {
             <TH>Tag</TH>
             <SortHeader label="Beli" align="right" active={sort.key === "buy_price"} dir={sort.dir} onClick={() => toggleSort("buy_price")} />
             <SortHeader label="Jual" align="right" active={sort.key === "sell_price"} dir={sort.dir} onClick={() => toggleSort("sell_price")} />
-            <SortHeader label="Laba" align="right" active={sort.key === "profit"} dir={sort.dir} onClick={() => toggleSort("profit")} />
+            <TH align="right">Laba</TH>
             <TH>Status</TH>
             <TH align="right">Aksi</TH>
           </tr>
@@ -187,6 +195,15 @@ function ProductsPage() {
           )}
         </TBody>
       </Table>
+
+      <Pagination
+        page={page}
+        totalPages={data?.total_pages ?? 1}
+        count={data?.count ?? 0}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+      />
 
       <ConfirmDialog
         open={!!toDelete}
